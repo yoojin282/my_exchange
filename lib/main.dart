@@ -19,21 +19,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'My Exchange',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -153,7 +138,8 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _reverse = !_reverse;
     });
-    _calculate();
+    _controller.clear();
+    _amount = '0';
   }
 
   void _showUnitDialog(BuildContext context) {
@@ -191,50 +177,14 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("환전정보"),
+        title: const Text("환율여행"),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        _reverse ? "KRW" : _currentUnit,
-                        style: const TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right),
-                      Text(
-                        _reverse ? _currentUnit : "KRW",
-                        style: const TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 4,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.swap_horizontal_circle),
-                        onPressed: () => _toggleReverse(),
-                      )
-                    ],
-                  ),
-                  TextButton(
-                    onPressed: () => _showUnitDialog(context),
-                    child: Text(
-                      _currentUnit,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  )
-                ],
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -254,6 +204,54 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
               const SizedBox(
+                height: 8,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        _reverse ? "KRW" : _currentUnit,
+                        style: const TextStyle(
+                          fontSize: 18,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.swap_horizontal_circle),
+                        onPressed: () => _toggleReverse(),
+                      ),
+                      const SizedBox(
+                        width: 4,
+                      ),
+                      Text(
+                        _reverse ? _currentUnit : "KRW",
+                        style: const TextStyle(
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  OutlinedButton(
+                    onPressed: () => _showUnitDialog(context),
+                    style: OutlinedButton.styleFrom(
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8))),
+                      padding: const EdgeInsets.only(right: 5, left: 16),
+                    ),
+                    child: Row(children: [
+                      Text(
+                        _currentUnit,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const Icon(
+                        Icons.arrow_drop_down,
+                      ),
+                    ]),
+                  )
+                ],
+              ),
+              const SizedBox(
                 height: 20,
               ),
               Row(
@@ -267,8 +265,7 @@ class _MainScreenState extends State<MainScreen> {
                       ],
                       style: const TextStyle(fontSize: 16),
                       decoration: InputDecoration(
-                          hintText:
-                              "원하시는 금액을 입력하세요. (${_reverse ? 'KRW' : _currentUnit})",
+                          hintText: "원하시는 금액을 입력하세요.",
                           suffix: Text(_reverse ? 'KRW' : _currentUnit),
                           suffixIcon: _controller.text.isEmpty
                               ? null
@@ -315,11 +312,11 @@ class _UnitItem extends StatelessWidget {
           children: [
             Text(
               unit,
-              style: const TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 20),
             ),
             if (selected) ...[
               const SizedBox(
-                width: 24,
+                width: 20,
               ),
               const Icon(
                 Icons.done,
@@ -337,26 +334,3 @@ class _ExchangeData {
 
   _ExchangeData({required this.date, required this.rate, required this.unit});
 }
-
-// class _ExchangeRate {
-//   final int result;
-//   final String unitCode;
-//   final String unitName;
-//   final String rate;
-
-//   _ExchangeRate({
-//     required this.result,
-//     required this.unitCode,
-//     required this.unitName,
-//     required this.rate,
-//   });
-
-//   factory _ExchangeRate.fromJson(Map<String, dynamic> json) {
-//     return _ExchangeRate(
-//       result: json['result'],
-//       unitCode: json['cur_unit'],
-//       unitName: json['cur_nm'],
-//       rate: json['ttb'],
-//     );
-//   }
-// }
