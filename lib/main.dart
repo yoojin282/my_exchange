@@ -39,8 +39,10 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _controller;
+  late AnimationController _animationController;
 
   String _currentUnit = 'THB';
   String _amount = '0';
@@ -54,16 +56,22 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _animationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
     _initData();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   void _initData() async {
+    if (!_animationController.isAnimating) {
+      _animationController.repeat();
+    }
     _ExchangeData data =
         await _loadExchangeRate(_currentUnit, _getAvailableDate());
     setState(() {
@@ -115,6 +123,7 @@ class _MainScreenState extends State<MainScreen> {
     }
     for (var item in result) {
       if (item['result'] == 1 && item['cur_unit'] == unit) {
+        _animationController.stop();
         return _ExchangeData(date: date, rate: item['tts'], unit: unit);
       }
     }
@@ -179,6 +188,13 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text("환율여행"),
         centerTitle: true,
+        actions: [
+          if (!_ready)
+            RotationTransition(
+              turns: Tween(begin: 0.0, end: 1.0).animate(_animationController),
+              child: const Icon(Icons.loop),
+            ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
