@@ -1,10 +1,11 @@
-import 'dart:convert';
+import 'dart:convert' as convert;
 
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+const String lastDataKey = "last_exchange_data";
 const String apiKey = 'F4FQRaV47zxbP6l86JiOXnV0HYT5PVAB';
 final Uri apiUrl = Uri.parse(
     'https://www.koreaexim.go.kr/site/program/financial/exchangeJSON');
@@ -42,7 +44,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen>
     with SingleTickerProviderStateMixin {
   late final TextEditingController _controller;
-  late AnimationController _animationController;
+  late final AnimationController _animationController;
 
   String _currentUnit = 'THB';
   String _amount = '0';
@@ -72,13 +74,32 @@ class _MainScreenState extends State<MainScreen>
     if (!_animationController.isAnimating) {
       _animationController.repeat();
     }
-    _ExchangeData data =
-        await _loadExchangeRate(_currentUnit, _getAvailableDate());
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? lastDataString = prefs.getString(lastDataKey);
+    _ExchangeData data;
+    if (lastDataString != null && lastDataString.isNotEmpty) {
+      data = _ExchangeData.fromJsonString(lastDataString);
+      DateTime now = DateTime.now();
+      DateTime fetchDate = data.fetchDate;
+      if (fetchDate.year == now.year &&
+          fetchDate.month == now.month &&
+          fetchDate.day == now.day) {
+        setState(() {
+          _date = data.date;
+          _rate = data.rate;
+          _ready = true;
+        });
+        return;
+      }
+    }
+    DateTime date = _getAvailableDate();
+    data = await _loadExchangeRate(_currentUnit, date);
     setState(() {
       _date = data.date;
       _rate = data.rate;
       _ready = true;
     });
+    prefs.setString(lastDataKey, data.toJsonString());
   }
 
   void _changeUnit(String unit) {
@@ -117,14 +138,19 @@ class _MainScreenState extends State<MainScreen>
         },
       ),
     );
-    final result = jsonDecode(utf8.decode(res.bodyBytes)) as List;
+    final result =
+        convert.jsonDecode(convert.utf8.decode(res.bodyBytes)) as List;
     if (result.isEmpty) {
       return _loadExchangeRate(unit, date.add(const Duration(days: -1)));
     }
     for (var item in result) {
       if (item['result'] == 1 && item['cur_unit'] == unit) {
         _animationController.stop();
-        return _ExchangeData(date: date, rate: item['tts'], unit: unit);
+        return _ExchangeData(
+            date: date,
+            rate: item['tts'],
+            unit: unit,
+            fetchDate: DateTime.now());
       }
     }
     throw Exception("해당 환율이 존재하지 않습니다.");
@@ -189,11 +215,15 @@ class _MainScreenState extends State<MainScreen>
         title: const Text("환율여행"),
         centerTitle: true,
         actions: [
-          if (!_ready)
+          if (!_ready) ...[
             RotationTransition(
               turns: Tween(begin: 0.0, end: 1.0).animate(_animationController),
               child: const Icon(Icons.loop),
             ),
+            const SizedBox(
+              width: 16,
+            ),
+          ]
         ],
       ),
       body: SafeArea(
@@ -347,6 +377,31 @@ class _ExchangeData {
   final DateTime date;
   final String rate;
   final String unit;
+  final DateTime fetchDate;
 
-  _ExchangeData({required this.date, required this.rate, required this.unit});
+  _ExchangeData({
+    required this.date,
+    required this.rate,
+    required this.unit,
+    required this.fetchDate,
+  });
+
+  String toJsonString() {
+    return convert.jsonEncode({
+      'date': DateFormat("yyyy-MM-dd").format(date),
+      'rate': rate,
+      'unit': unit,
+      'fetch_date': DateFormat("yyyy-MM-dd").format(fetchDate)
+    });
+  }
+
+  factory _ExchangeData.fromJsonString(String jsonString) {
+    Map<String, dynamic> json = convert.jsonDecode(jsonString);
+    return _ExchangeData(
+      date: DateTime.parse(json['date']),
+      rate: json['rate'],
+      unit: json['unit'],
+      fetchDate: DateTime.parse(json['fetch_date']),
+    );
+  }
 }
