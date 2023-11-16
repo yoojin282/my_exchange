@@ -20,8 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'My Exchange',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
       home: const MainScreen(),
     );
@@ -51,7 +50,8 @@ class _MainScreenState extends State<MainScreen>
   String _rate = '0';
   bool _ready = false;
   bool _reverse = false;
-  DateTime? _date;
+  // DateTime? _date;
+  _ExchangeData? _data;
   // final DateTime _date = DateTime.now().subtract(const Duration(days: 1));
 
   @override
@@ -75,46 +75,43 @@ class _MainScreenState extends State<MainScreen>
       _animationController.repeat();
     }
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? lastDataString = prefs.getString(lastDataKey);
-    _ExchangeData data;
-    if (lastDataString != null && lastDataString.isNotEmpty) {
-      data = _ExchangeData.fromJsonString(lastDataString);
-      DateTime now = DateTime.now();
-      DateTime fetchDate = data.fetchDate;
-      if (fetchDate.year == now.year &&
-          fetchDate.month == now.month &&
-          fetchDate.day == now.day) {
-        setState(() {
-          _date = data.date;
-          _rate = data.rate;
-          _ready = true;
-        });
-        return;
+    String? lastDataString = prefs.getString(lastDataKey);
+
+    try {
+      if (lastDataString?.isNotEmpty ?? false) {
+        _data = _ExchangeData.fromJsonString(lastDataString!);
+        DateTime now = DateTime.now();
+        DateTime fetchDate = _data!.fetchDate;
+        if (fetchDate.year == now.year &&
+            fetchDate.month == now.month &&
+            fetchDate.day == now.day) {
+          setState(() {
+            // _date = _data.date;
+            _ready = true;
+          });
+          _changeUnit(_currentUnit);
+          return;
+        }
       }
+    } catch (e) {
+      prefs.remove(lastDataKey);
     }
     DateTime date = _getAvailableDate();
-    data = await _loadExchangeRate(_currentUnit, date);
-    setState(() {
-      _date = data.date;
-      _rate = data.rate;
-      _ready = true;
-    });
-    prefs.setString(lastDataKey, data.toJsonString());
+    _data = await _loadExchangeRate(date);
+    _changeUnit(_currentUnit);
+    prefs.setString(lastDataKey, _data!.toJsonString());
   }
 
   void _changeUnit(String unit) {
-    setState(() {
-      _ready = false;
-    });
-    _loadExchangeRate(unit, _date!).then((data) {
-      setState(() {
-        _date = data.date;
-        _rate = data.rate;
-        _currentUnit = data.unit;
-        _ready = true;
-      });
-      Navigator.pop(context);
-    });
+    for (var item in _data!.currencies) {
+      if (item.unit == unit) {
+        setState(() {
+          _ready = true;
+          _rate = item.rate;
+          _currentUnit = item.unit;
+        });
+      }
+    }
   }
 
   DateTime _getAvailableDate() {
@@ -128,7 +125,7 @@ class _MainScreenState extends State<MainScreen>
     return now;
   }
 
-  Future<_ExchangeData> _loadExchangeRate(String unit, DateTime date) async {
+  Future<_ExchangeData> _loadExchangeRate(DateTime date) async {
     final res = await http.get(
       apiUrl.replace(
         queryParameters: {
@@ -141,19 +138,17 @@ class _MainScreenState extends State<MainScreen>
     final result =
         convert.jsonDecode(convert.utf8.decode(res.bodyBytes)) as List;
     if (result.isEmpty) {
-      return _loadExchangeRate(unit, date.add(const Duration(days: -1)));
+      return _loadExchangeRate(date.add(const Duration(days: -1)));
     }
+    List<_Currency> currencies = [];
     for (var item in result) {
-      if (item['result'] == 1 && item['cur_unit'] == unit) {
-        _animationController.stop();
-        return _ExchangeData(
-            date: date,
-            rate: item['tts'],
-            unit: unit,
-            fetchDate: DateTime.now());
-      }
+      currencies.add(_Currency(rate: item['tts'], unit: item['cur_unit']));
     }
-    throw Exception("해당 환율이 존재하지 않습니다.");
+    return _ExchangeData(
+      date: date,
+      currencies: currencies,
+      fetchDate: date,
+    );
   }
 
   void _calculate() {
@@ -186,7 +181,12 @@ class _MainScreenState extends State<MainScreen>
           children: [
             for (var unit in units)
               InkWell(
-                onTap: _currentUnit == unit ? null : () => _changeUnit(unit),
+                onTap: _currentUnit == unit
+                    ? null
+                    : () {
+                        _changeUnit(unit);
+                        Navigator.pop(context);
+                      },
                 child: _UnitItem(
                   unit: unit,
                   selected: _currentUnit == unit,
@@ -234,9 +234,9 @@ class _MainScreenState extends State<MainScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (_date != null)
+                  if (_data != null)
                     Text(
-                      '환율발표: ${DateFormat('MM월 dd일').format(_date!)}',
+                      '환율발표: ${DateFormat('MM월 dd일').format(_data!.date)}',
                       style: const TextStyle(
                         fontSize: 16,
                       ),
@@ -375,33 +375,53 @@ class _UnitItem extends StatelessWidget {
 
 class _ExchangeData {
   final DateTime date;
-  final String rate;
-  final String unit;
+  final List<_Currency> currencies;
   final DateTime fetchDate;
 
   _ExchangeData({
     required this.date,
-    required this.rate,
-    required this.unit,
+    required this.currencies,
     required this.fetchDate,
   });
 
   String toJsonString() {
     return convert.jsonEncode({
       'date': DateFormat("yyyy-MM-dd").format(date),
-      'rate': rate,
-      'unit': unit,
+      'currencies':
+          convert.jsonEncode(currencies.map((e) => e.toJsonString()).toList()),
       'fetch_date': DateFormat("yyyy-MM-dd").format(fetchDate)
     });
   }
 
   factory _ExchangeData.fromJsonString(String jsonString) {
     Map<String, dynamic> json = convert.jsonDecode(jsonString);
+    final currencies = convert.jsonDecode(json['currencies']) as List;
     return _ExchangeData(
       date: DateTime.parse(json['date']),
+      currencies: currencies.map((e) => _Currency.fromJsonString(e)).toList(),
+      fetchDate: DateTime.parse(json['fetch_date']),
+    );
+  }
+}
+
+class _Currency {
+  final String rate;
+  final String unit;
+
+  _Currency({required this.rate, required this.unit});
+
+  String toJsonString() {
+    return convert.jsonEncode({
+      'rate': rate,
+      'unit': unit,
+    });
+  }
+
+  factory _Currency.fromJsonString(String jsonString) {
+    Map<String, dynamic> json = convert.jsonDecode(jsonString);
+    return _Currency(
       rate: json['rate'],
       unit: json['unit'],
-      fetchDate: DateTime.parse(json['fetch_date']),
     );
   }
 }
