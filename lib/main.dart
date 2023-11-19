@@ -208,6 +208,17 @@ class _MainScreenState extends State<MainScreen>
     _calculate();
   }
 
+  void _onTabPrice(int price) {
+    final strInput = _controller.text;
+    int input = 0;
+    if (strInput.isNotEmpty) {
+      input = int.parse(_controller.text);
+    }
+    input += price;
+    _controller.text = input.toString();
+    _calculate();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -298,7 +309,46 @@ class _MainScreenState extends State<MainScreen>
                 ],
               ),
               const SizedBox(
-                height: 20,
+                height: 8,
+              ),
+              Row(
+                children: [
+                  _ShortcutPrice(
+                    label: "+20",
+                    onTab: () => _onTabPrice(20),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  _ShortcutPrice(
+                    label: "+100",
+                    onTab: () => _onTabPrice(100),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  _ShortcutPrice(
+                    label: "+500",
+                    onTab: () => _onTabPrice(500),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  _ShortcutPrice(
+                    label: "+1,000",
+                    onTab: () => _onTabPrice(1000),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  _ShortcutPrice(
+                    label: "+5,000",
+                    onTab: () => _onTabPrice(5000),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 8,
               ),
               Row(
                 children: [
@@ -338,6 +388,40 @@ class _MainScreenState extends State<MainScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ShortcutPrice extends StatelessWidget {
+  const _ShortcutPrice({
+    required this.label,
+    required this.onTab,
+  });
+
+  final String label;
+  final void Function() onTab;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        minimumSize: Size.zero,
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 12,
+        ),
+        side: const BorderSide(
+          color: Colors.blueAccent,
+        ),
+        textStyle: const TextStyle(
+          fontSize: 14,
+          color: Colors.blueAccent,
+        ),
+      ),
+      onPressed: onTab,
+      child: Text(
+        label,
       ),
     );
   }
