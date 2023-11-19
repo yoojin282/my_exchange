@@ -318,28 +318,28 @@ class _MainScreenState extends State<MainScreen>
                     onTab: () => _onTabPrice(20),
                   ),
                   const SizedBox(
-                    width: 8,
+                    width: 6,
                   ),
                   _ShortcutPrice(
                     label: "+100",
                     onTab: () => _onTabPrice(100),
                   ),
                   const SizedBox(
-                    width: 8,
+                    width: 6,
                   ),
                   _ShortcutPrice(
                     label: "+500",
                     onTab: () => _onTabPrice(500),
                   ),
                   const SizedBox(
-                    width: 8,
+                    width: 6,
                   ),
                   _ShortcutPrice(
                     label: "+1,000",
                     onTab: () => _onTabPrice(1000),
                   ),
                   const SizedBox(
-                    width: 8,
+                    width: 6,
                   ),
                   _ShortcutPrice(
                     label: "+5,000",
@@ -408,8 +408,8 @@ class _ShortcutPrice extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         minimumSize: Size.zero,
         padding: const EdgeInsets.symmetric(
-          vertical: 8,
-          horizontal: 12,
+          vertical: 6,
+          horizontal: 10,
         ),
         side: const BorderSide(
           color: Colors.blueAccent,
