@@ -109,6 +109,8 @@ class _MainScreenState extends State<MainScreen>
           _ready = true;
           _rate = item.rate;
           _currentUnit = item.unit;
+          _amount = "0";
+          _controller.clear();
         });
       }
     }
