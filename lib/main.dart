@@ -22,6 +22,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: TextScaler.noScaling,
+        ),
+        child: child!,
+      ),
       home: const MainScreen(),
     );
   }
@@ -31,7 +37,9 @@ const String lastDataKey = "last_exchange_data";
 const String apiKey = 'F4FQRaV47zxbP6l86JiOXnV0HYT5PVAB';
 final Uri apiUrl = Uri.parse(
     'https://www.koreaexim.go.kr/site/program/financial/exchangeJSON');
-const List<String> units = ['USD', 'THB'];
+const List<String> units = ['USD', 'THB', "JPY(100)"];
+const shortcuts = [20, 100, 500, 1000, 5000];
+const reverseShortcuts = [1000, 5000, 10000, 50000, 100000];
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -154,11 +162,12 @@ class _MainScreenState extends State<MainScreen>
   }
 
   void _calculate() {
-    double rate = double.parse(_rate.replaceAll(",", ""));
-    final strInput = _controller.text;
+    double rate = double.parse(_rate.replaceAll(",", "")) *
+        (_currentUnit.endsWith("(100)") ? 0.01 : 1);
+    final strInput = _controller.text.replaceAll(",", "");
     int input = 0;
     if (strInput.isNotEmpty) {
-      input = int.parse(_controller.text);
+      input = int.parse(strInput);
     }
     double result = _reverse ? input / rate : input * rate;
     setState(() {
@@ -211,13 +220,13 @@ class _MainScreenState extends State<MainScreen>
   }
 
   void _onTabPrice(int price) {
-    final strInput = _controller.text;
+    final strInput = _controller.text.replaceAll(",", "");
     int input = 0;
     if (strInput.isNotEmpty) {
-      input = int.parse(_controller.text);
+      input = int.parse(strInput);
     }
     input += price;
-    _controller.text = input.toString();
+    _controller.text = NumberFormat("###,###,###").format(input);
     _calculate();
   }
 
@@ -241,149 +250,150 @@ class _MainScreenState extends State<MainScreen>
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (_data != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (_data != null)
+                      Text(
+                        '환율발표: ${DateFormat('MM월 dd일').format(_data!.date)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
                     Text(
-                      '환율발표: ${DateFormat('MM월 dd일').format(_data!.date)}',
+                      '환율: $_rate 원',
                       style: const TextStyle(
                         fontSize: 16,
                       ),
                     ),
-                  Text(
-                    '환율: $_rate 원',
-                    style: const TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(
                 height: 8,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        _reverse ? "KRW" : _currentUnit,
-                        style: const TextStyle(
-                          fontSize: 18,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          _reverse
+                              ? "KRW"
+                              : _currentUnit.replaceAll("(100)", ""),
+                          style: const TextStyle(
+                            fontSize: 18,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.swap_horizontal_circle),
-                        onPressed: () => _toggleReverse(),
-                      ),
-                      const SizedBox(
-                        width: 4,
-                      ),
-                      Text(
-                        _reverse ? _currentUnit : "KRW",
-                        style: const TextStyle(
-                          fontSize: 18,
+                        IconButton(
+                          icon: const Icon(Icons.swap_horizontal_circle),
+                          onPressed: () => _toggleReverse(),
                         ),
-                      ),
-                    ],
-                  ),
-                  OutlinedButton(
-                    onPressed: () => _showUnitDialog(context),
-                    style: OutlinedButton.styleFrom(
-                      shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8))),
-                      padding: const EdgeInsets.only(right: 5, left: 16),
-                    ),
-                    child: Row(children: [
-                      Text(
-                        _currentUnit,
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                      const Icon(
-                        Icons.arrow_drop_down,
-                      ),
-                    ]),
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              Row(
-                children: [
-                  _ShortcutPrice(
-                    label: "+20",
-                    onTab: () => _onTabPrice(20),
-                  ),
-                  const SizedBox(
-                    width: 6,
-                  ),
-                  _ShortcutPrice(
-                    label: "+100",
-                    onTab: () => _onTabPrice(100),
-                  ),
-                  const SizedBox(
-                    width: 6,
-                  ),
-                  _ShortcutPrice(
-                    label: "+500",
-                    onTab: () => _onTabPrice(500),
-                  ),
-                  const SizedBox(
-                    width: 6,
-                  ),
-                  _ShortcutPrice(
-                    label: "+1,000",
-                    onTab: () => _onTabPrice(1000),
-                  ),
-                  const SizedBox(
-                    width: 6,
-                  ),
-                  _ShortcutPrice(
-                    label: "+5,000",
-                    onTab: () => _onTabPrice(5000),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
+                        const SizedBox(
+                          width: 4,
+                        ),
+                        Text(
+                          _reverse
+                              ? _currentUnit.replaceAll("(100)", "")
+                              : "KRW",
+                          style: const TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
                       ],
-                      style: const TextStyle(fontSize: 16),
-                      decoration: InputDecoration(
-                          hintText: "원하시는 금액을 입력하세요.",
-                          suffix: Text(_reverse ? 'KRW' : _currentUnit),
-                          suffixIcon: _controller.text.isEmpty
-                              ? null
-                              : IconButton(
-                                  onPressed: _clearInput,
-                                  icon: const Icon(
-                                    Icons.cancel,
-                                  ),
-                                )),
-                      textInputAction: TextInputAction.done,
-                      onChanged: _ready ? _onInputChange : null,
                     ),
-                  ),
-                ],
+                    OutlinedButton(
+                      onPressed: () => _showUnitDialog(context),
+                      style: OutlinedButton.styleFrom(
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8))),
+                        padding: const EdgeInsets.only(right: 5, left: 16),
+                      ),
+                      child: Row(children: [
+                        Text(
+                          _currentUnit.replaceAll("(100)", ""),
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        const Icon(
+                          Icons.arrow_drop_down,
+                        ),
+                      ]),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 8,
+              ),
+              SizedBox(
+                height: 30,
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    int amount =
+                        _reverse ? reverseShortcuts[index] : shortcuts[index];
+                    return _ShortcutPrice(
+                      amount: amount,
+                      onTab: () => _onTabPrice(amount),
+                    );
+                  },
+                  separatorBuilder: (_, __) => const SizedBox(width: 6),
+                  itemCount:
+                      _reverse ? reverseShortcuts.length : shortcuts.length,
+                ),
+              ),
+              const SizedBox(
+                height: 8,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          CommaSeparatorInputFormatter(),
+                        ],
+                        style: const TextStyle(fontSize: 16),
+                        decoration: InputDecoration(
+                            hintText: "원하시는 금액을 입력하세요.",
+                            suffix: Text(_reverse
+                                ? 'KRW'
+                                : _currentUnit.replaceAll("(100)", "")),
+                            suffixIcon: _controller.text.isEmpty
+                                ? null
+                                : IconButton(
+                                    onPressed: _clearInput,
+                                    icon: const Icon(
+                                      Icons.cancel,
+                                    ),
+                                  )),
+                        textInputAction: TextInputAction.done,
+                        onChanged: _ready ? _onInputChange : null,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               Expanded(
-                child: Center(
-                  child: Text(
-                    '$_amount ${_reverse ? _currentUnit : '원'}',
-                    style: const TextStyle(fontSize: 48),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Center(
+                    child: Text(
+                      '$_amount ${_reverse ? _currentUnit.replaceAll("(100)", "") : '원'}',
+                      style: const TextStyle(fontSize: 48),
+                    ),
                   ),
                 ),
               ),
@@ -397,11 +407,11 @@ class _MainScreenState extends State<MainScreen>
 
 class _ShortcutPrice extends StatelessWidget {
   const _ShortcutPrice({
-    required this.label,
+    required this.amount,
     required this.onTab,
   });
 
-  final String label;
+  final int amount;
   final void Function() onTab;
 
   @override
@@ -423,7 +433,7 @@ class _ShortcutPrice extends StatelessWidget {
       ),
       onPressed: onTab,
       child: Text(
-        label,
+        "+ ${NumberFormat("###,###,###").format(amount)}",
       ),
     );
   }
@@ -509,5 +519,47 @@ class _Currency {
       rate: json['rate'],
       unit: json['unit'],
     );
+  }
+}
+
+class CommaSeparatorInputFormatter extends TextInputFormatter {
+  static const separator = ",";
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: "");
+    }
+
+    String oldValueText = oldValue.text.replaceAll(separator, '');
+    String newValueText = newValue.text.replaceAll(separator, '');
+    if (oldValue.text.endsWith(separator) &&
+        oldValue.text.length == newValue.text.length + 1) {
+      newValueText = newValueText.substring(0, newValueText.length - 1);
+    }
+
+    // Only process if the old value and new value are different
+    if (oldValueText != newValueText) {
+      int selectionIndex =
+          newValue.text.length - newValue.selection.extentOffset;
+      final chars = newValueText.split('');
+
+      String newString = '';
+      for (int i = chars.length - 1; i >= 0; i--) {
+        if ((chars.length - 1 - i) % 3 == 0 && i != chars.length - 1) {
+          newString = separator + newString;
+        }
+        newString = chars[i] + newString;
+      }
+
+      return TextEditingValue(
+        text: newString.toString(),
+        selection: TextSelection.collapsed(
+          offset: newString.length - selectionIndex,
+        ),
+      );
+    }
+    return newValue;
   }
 }
