@@ -1,4 +1,5 @@
 import 'dart:convert' as convert;
+import 'dart:developer';
 
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -40,6 +41,7 @@ final Uri apiUrl = Uri.parse(
 const List<String> units = ['USD', 'THB', "JPY(100)"];
 const shortcuts = [20, 100, 500, 1000, 5000];
 const reverseShortcuts = [1000, 5000, 10000, 50000, 100000];
+const int maxRetryCount = 5;
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -61,6 +63,7 @@ class _MainScreenState extends State<MainScreen>
   // DateTime? _date;
   _ExchangeData? _data;
   // final DateTime _date = DateTime.now().subtract(const Duration(days: 1));
+  int _tryCount = 0;
 
   @override
   void initState() {
@@ -106,8 +109,23 @@ class _MainScreenState extends State<MainScreen>
     }
     DateTime date = _getAvailableDate();
     _data = await _loadExchangeRate(date);
+    if (_data == null) {
+      _showErrorAlert();
+      _animationController.stop();
+      return;
+    }
     _changeUnit(_currentUnit);
     prefs.setString(lastDataKey, _data!.toJsonString());
+  }
+
+  void _showErrorAlert() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("환율정보 불러오기에 실패했습니다. 잠시후 다시 시도해 주세요."),
+        duration: Duration(seconds: 5),
+      ),
+    );
+    _tryCount = 0;
   }
 
   void _changeUnit(String unit) {
@@ -135,18 +153,29 @@ class _MainScreenState extends State<MainScreen>
     return now;
   }
 
-  Future<_ExchangeData> _loadExchangeRate(DateTime date) async {
-    final res = await http.get(
-      apiUrl.replace(
-        queryParameters: {
-          'authkey': apiKey,
-          'searchdate': DateFormat('yyyyMMdd').format(date),
-          'data': 'AP01',
-        },
-      ),
-    );
-    final result =
-        convert.jsonDecode(convert.utf8.decode(res.bodyBytes)) as List;
+  Future<_ExchangeData?> _loadExchangeRate(DateTime date) async {
+    if (_tryCount >= maxRetryCount) {
+      return null;
+    }
+
+    late final List<dynamic> result;
+    try {
+      final res = await http.get(
+        apiUrl.replace(
+          queryParameters: {
+            'authkey': apiKey,
+            'searchdate': DateFormat('yyyyMMdd').format(date),
+            'data': 'AP01',
+          },
+        ),
+      );
+      result = convert.jsonDecode(convert.utf8.decode(res.bodyBytes))
+          as List<dynamic>;
+      _tryCount++;
+    } catch (e) {
+      log("[에러] ${e.toString()}");
+      return null;
+    }
     if (result.isEmpty) {
       return _loadExchangeRate(date.add(const Duration(days: -1)));
     }
