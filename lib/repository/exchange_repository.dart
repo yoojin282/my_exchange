@@ -13,7 +13,7 @@ class ExchangeRepository {
   final currencyTableName = CurrencyDB.tableName;
   final exchangeTableName = ExchangeDB.tableName;
 
-  Future<bool> isFetchedByDate(DateTime date) async {
+  Future<bool> isExistsByDate(DateTime date) async {
     final db = await dbProvider.database;
     final result = await db.query(
       exchangeTableName,
@@ -21,13 +21,15 @@ class ExchangeRepository {
       where: "date = ?",
       whereArgs: [DateFormat("yyyy-MM-dd").format(date)],
     );
-    return (Sqflite.firstIntValue(result) ?? 0) > 0;
+    int count = Sqflite.firstIntValue(result) ?? 0;
+    return count > 0;
   }
 
   Future<CurrencyDB> selectByDateAndUnit(DateTime date, String unit) async {
     final db = await dbProvider.database;
     final result = await db.query(
       currencyTableName,
+      columns: ["date", "unit", "rate"],
       where: "date = ? and unit = ?",
       whereArgs: [DateFormat("yyyy-MM-dd").format(date), unit],
     );
@@ -36,9 +38,11 @@ class ExchangeRepository {
 
   Future<void> save(ExchangeDB exchange) async {
     final db = await dbProvider.database;
-    db.transaction((txn) async {
+    return db.transaction((txn) async {
+      log("[DB] 베이스 데이터 저장");
       await txn.insert(exchangeTableName, exchange.toJson());
       if (exchange.currencies?.isNotEmpty ?? false) {
+        log('[DB] 나라별 환율정보 저장');
         for (final currency in exchange.currencies!) {
           await txn.insert(currencyTableName, currency.toJson());
         }
@@ -64,10 +68,17 @@ class ExchangeRepository {
       log("[에러] ${e.toString()}");
       return null;
     }
+    if (result.isEmpty) return null;
+
     List<CurrencyDB> currencies = [];
     for (var item in result) {
       currencies.add(
-          CurrencyDB(date: date, rate: item['tts'], unit: item['cur_unit']));
+        CurrencyDB(
+          date: date,
+          rate: double.parse((item['tts'] as String).replaceAll(",", "")),
+          unit: item['cur_unit'],
+        ),
+      );
     }
     return ExchangeDB(
       date: date,

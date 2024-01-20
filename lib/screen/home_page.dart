@@ -13,9 +13,10 @@ const reverseShortcuts = [1000, 5000, 10000, 50000, 100000];
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
-  void _showUnitDialog(BuildContext context) {
+  void _showUnitDialog(BuildContext originContext) {
+    final provider = originContext.read<HomeProvider>();
     showModalBottomSheet(
-      context: context,
+      context: originContext,
       builder: (context) {
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -24,11 +25,12 @@ class MainScreen extends StatelessWidget {
               InkWell(
                 onTap: () {
                   // _changeUnit(unit);
+                  provider.setCurrentUnit(unit);
                   Navigator.pop(context);
                 },
                 child: _UnitItem(
                   unit: unit,
-                  selected: false,
+                  selected: provider.currentUnit == unit,
                 ),
               ),
           ],
@@ -45,14 +47,12 @@ class MainScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text("환율여행"),
           centerTitle: true,
+          leading:
+              context.select<HomeProvider, bool>((value) => value.isLoading)
+                  ? const _RefreshIcon()
+                  : null,
           actions: [
-            if (context
-                .select<HomeProvider, bool>((value) => value.isLoading)) ...[
-              const _RefreshIcon(),
-              const SizedBox(
-                width: 16,
-              ),
-            ]
+            IconButton(onPressed: () {}, icon: const Icon(Icons.bar_chart))
           ],
         ),
         body: SafeArea(
@@ -240,11 +240,11 @@ class MainScreen extends StatelessWidget {
                           child:
                               Selector<HomeProvider, Tuple3<bool, String, int>>(
                             builder: (context, value, child) => Text(
-                              '${value.item3} ${value.item1 ? value.item2.replaceAll("(100)", "") : '원'}',
+                              '${NumberFormat("###,###,###").format(value.item3)} ${value.item1 ? value.item2.replaceAll("(100)", "") : "원"}',
                               style: const TextStyle(fontSize: 48),
                             ),
                             selector: (p0, p1) => Tuple3(
-                                p1.isLoading, p1.currentUnit, p1.totalAmount),
+                                p1.isReverse, p1.currentUnit, p1.totalAmount),
                           ),
                         ),
                       ),
@@ -253,11 +253,17 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
               if (context.select<HomeProvider, bool>((value) => value.hasError))
-                const Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SnackBar(
-                    content: Text("환율정보 불러오기에 실패했습니다. 잠시후 다시 시도해 주세요."),
-                    duration: Duration(seconds: 5),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    color: Colors.red,
+                    child: const Text(
+                      "환율정보 불러오기에 실패했습니다. 잠시후 다시 시도해 주세요.",
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
                   ),
                 )
             ],
@@ -387,9 +393,12 @@ class __RefreshIconState extends State<_RefreshIcon>
 
   @override
   void initState() {
-    _controller = AnimationController(vsync: this);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
     super.initState();
-    _controller.forward();
+    _controller.repeat();
   }
 
   @override

@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/screen/home_page.dart';
 
-void main() {
+Future<void> main() async {
   initializeGetIt();
+  // WidgetsFlutterBinding.ensureInitialized();
+  // if (kDebugMode) {
+  //   await DatabaseService.provider.reset();
+  // }
   runApp(const MyApp());
 }
 

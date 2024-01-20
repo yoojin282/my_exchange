@@ -5,7 +5,7 @@ import 'package:my_exchange/service/exchange_service.dart';
 
 class HomeProvider with ChangeNotifier {
   HomeProvider() {
-    _textController = TextEditingController(text: "0");
+    _textController = TextEditingController();
     _load();
   }
   final _service = getIt<ExchangeService>();
@@ -36,13 +36,16 @@ class HomeProvider with ChangeNotifier {
   }
 
   void onInputChanged() {
-    _textController.text =
-        NumberFormat("###,###,###").format(_textController.text);
+    final inputText = _textController.text.replaceAll(",", "");
+    if (inputText.isNotEmpty) {
+      _textController.text =
+          NumberFormat("###,###,###").format(int.parse(inputText));
+    }
     _calculate();
   }
 
   void setCurrentUnit(String unit) {
-    _service.getCurrency(_currentUnit).then((value) {
+    _service.getCurrency(unit).then((value) {
       _loading = false;
       if (value == null) {
         _error = true;
@@ -64,6 +67,8 @@ class HomeProvider with ChangeNotifier {
 
   void clearInput() {
     _textController.clear();
+    _totalAmount = 0;
+    notifyListeners();
   }
 
   void addPrice(int amount) {
