@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/service/exchange_service.dart';
 
@@ -12,6 +13,7 @@ class HomeProvider with ChangeNotifier {
   late TextEditingController _textController;
   String _currentUnit = 'THB';
   double _rate = 0;
+  DateTime _date = DateTime.now();
   int _totalAmount = 0;
   bool _loading = true;
   bool _reverse = false;
@@ -21,6 +23,7 @@ class HomeProvider with ChangeNotifier {
   String get currentUnit => _currentUnit;
   double get rate => _rate;
   int get totalAmount => _totalAmount;
+  DateTime get date => _date;
 
   bool get isLoading => _loading;
   bool get isReverse => _reverse;
@@ -33,6 +36,8 @@ class HomeProvider with ChangeNotifier {
   }
 
   void onInputChanged() {
+    _textController.text =
+        NumberFormat("###,###,###").format(_textController.text);
     _calculate();
   }
 
@@ -44,6 +49,7 @@ class HomeProvider with ChangeNotifier {
         notifyListeners();
         return;
       }
+      _date = value.date;
       _currentUnit = value.unit;
       _rate = value.rate;
       _calculate();
@@ -52,18 +58,34 @@ class HomeProvider with ChangeNotifier {
 
   void toggleReverse() {
     _reverse = !_reverse;
+    _textController.text = "0";
+    _calculate();
+  }
+
+  void clearInput() {
+    _textController.clear();
+  }
+
+  void addPrice(int amount) {
+    int sum = _getInputPrice() + amount;
+    _textController.text = NumberFormat("###,###,###").format(sum);
     _calculate();
   }
 
   void _calculate() {
     double realRate = _rate * (_currentUnit.endsWith("(100)") ? 0.01 : 1);
+    int input = _getInputPrice();
+    double result = _reverse ? input / realRate : input * realRate;
+    _totalAmount = result.toInt();
+    notifyListeners();
+  }
+
+  int _getInputPrice() {
     final strInput = _textController.text.replaceAll(",", "");
     int input = 0;
     if (strInput.isNotEmpty) {
       input = int.parse(strInput);
     }
-    double result = _reverse ? input / realRate : input * realRate;
-    _totalAmount = result.toInt();
-    notifyListeners();
+    return input;
   }
 }
