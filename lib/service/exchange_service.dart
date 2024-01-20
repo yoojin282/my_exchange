@@ -37,6 +37,13 @@ class ExchangeService {
     return null;
   }
 
+  Future<List<CurrencyDB>> getCurrenciesByUnit(String unit) {
+    log('[DB] 일주일간 데이터 가져오기. unit: $unit');
+    final DateTime now = DateTime.now();
+    final from = now.add(const Duration(days: -7));
+    return _repository.selectListByUnitAndBetween(unit, from: from, to: now);
+  }
+
   DateTime _getAvailableDate() {
     DateTime now = DateTime.now();
     int day = now.weekday;

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/provider/home_provider.dart';
+import 'package:my_exchange/screen/chart_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:tuple/tuple.dart';
-
-const List<String> availableUnits = ['USD', 'THB', "JPY(100)"];
-const shortcuts = [20, 100, 500, 1000, 5000];
-const reverseShortcuts = [1000, 5000, 10000, 50000, 100000];
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -52,7 +50,13 @@ class MainScreen extends StatelessWidget {
                   ? const _RefreshIcon()
                   : null,
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.bar_chart))
+            IconButton(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChartScreen(),
+                    )),
+                icon: const Icon(Icons.bar_chart))
           ],
         ),
         body: SafeArea(

@@ -50,6 +50,26 @@ class ExchangeRepository {
     });
   }
 
+  Future<List<CurrencyDB>> selectListByUnitAndBetween(
+    String unit, {
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    final db = await dbProvider.database;
+    final result = await db.query(
+      currencyTableName,
+      columns: ["date", "rate", "unit"],
+      where: "date BETWEEN ? AND ? AND unit = ?",
+      whereArgs: [
+        DateFormat("yyyy-MM-dd").format(from),
+        DateFormat("yyyy-MM-dd").format(to),
+        unit
+      ],
+    );
+    if (result.isEmpty) return [];
+    return result.map((e) => CurrencyDB.fromJson(e)).toList();
+  }
+
   Future<ExchangeDB?> getExchangeRateByDateFromApi(DateTime date) async {
     late final List<dynamic> result;
     try {
