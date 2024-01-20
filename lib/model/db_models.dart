@@ -8,6 +8,7 @@ class ExchangeDB {
   ExchangeDB({
     required this.date,
     required this.createdAt,
+    this.currencies,
   });
 
   Map<String, dynamic> toJson() {
@@ -46,6 +47,14 @@ class CurrencyDB {
       unit: json['unit'],
       rate: json['rate'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "date": DateFormat("yyyy-MM-dd").format(date),
+      "unit": unit,
+      "rate": rate,
+    };
   }
 
   static const tableName = "currency";

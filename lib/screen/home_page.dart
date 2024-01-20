@@ -3,15 +3,13 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:my_exchange/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
 const String lastDataKey = "last_exchange_data";
-const String apiKey = 'F4FQRaV47zxbP6l86JiOXnV0HYT5PVAB';
-final Uri apiUrl = Uri.parse(
-    'https://www.koreaexim.go.kr/site/program/financial/exchangeJSON');
-const List<String> units = ['USD', 'THB', "JPY(100)"];
+const List<String> availableUnits = ['USD', 'THB', "JPY(100)"];
 const shortcuts = [20, 100, 500, 1000, 5000];
 const reverseShortcuts = [1000, 5000, 10000, 50000, 100000];
 const int maxRetryCount = 5;
@@ -192,7 +190,7 @@ class _MainScreenState extends State<MainScreen>
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            for (var unit in units)
+            for (var unit in availableUnits)
               InkWell(
                 onTap: _currentUnit == unit
                     ? null
