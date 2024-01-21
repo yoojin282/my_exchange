@@ -50,10 +50,15 @@ class _ChartScreenState extends State<ChartScreen> {
 }
 
 class _ChartItem extends StatelessWidget {
-  const _ChartItem({required this.unit, required this.data});
+  _ChartItem({required this.unit, required this.data});
 
   final String unit;
   final List<CurrencyDB> data;
+
+  final List<Color> _gradientColors = [
+    const Color(0xff23b6e6),
+    const Color(0xff02d39a),
+  ];
 
   LineChartData _createChartData() {
     int index = 0;
@@ -75,11 +80,13 @@ class _ChartItem extends StatelessWidget {
 
     final barData = LineChartBarData(
       isCurved: true,
-      color: Colors.amber,
       barWidth: 5,
       isStrokeCapRound: true,
       dotData: const FlDotData(show: false),
       belowBarData: BarAreaData(show: false),
+      gradient: LinearGradient(
+        colors: _gradientColors,
+      ),
       spots: spots,
     );
     return LineChartData(
@@ -92,7 +99,6 @@ class _ChartItem extends StatelessWidget {
         show: true,
         border: Border.all(color: const Color(0xff37434d)),
       ),
-      backgroundColor: Colors.black12,
       gridData: const FlGridData(show: false),
       titlesData: FlTitlesData(
           show: true,
@@ -104,31 +110,29 @@ class _ChartItem extends StatelessWidget {
           leftTitles: AxisTitles(
               sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 50,
+            reservedSize: 48,
             getTitlesWidget: (value, meta) {
-              if (unit == 'USD') {
-                print('$maxY, $value');
-              }
-              if (maxY == value || minY == value) return const SizedBox();
-              if (value %
-                      (maxY > 100
-                          ? 1
-                          : maxY > 1000
-                              ? 10
-                              : 1) ==
-                  0) {
-                return Text(value.toInt().toString());
-              }
-
-              // return Text(value.toInt().toString());
-              return const SizedBox();
+              return Text(
+                value.toInt().toString(),
+                style: const TextStyle(
+                  color: Color(0xff67727d),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              );
             },
           )),
           bottomTitles: AxisTitles(
               sideTitles: SideTitles(
             showTitles: true,
-            getTitlesWidget: (value, meta) =>
-                Text('${dates[value.toInt()].day}일'),
+            getTitlesWidget: (value, meta) => Text(
+              '${dates[value.toInt()].day}일',
+              style: const TextStyle(
+                color: Color(0xff67727d),
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
           ))),
     );
   }
@@ -137,13 +141,16 @@ class _ChartItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 1,
-      color: Colors.blueGrey,
+      color: const Color(0xff222e38),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         child: Column(
           children: [
-            Text(unit),
-            const SizedBox(height: 8),
+            Text(
+              unit,
+              style: const TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 16),
             AspectRatio(aspectRatio: 1.5, child: LineChart(_createChartData())),
           ],
         ),
