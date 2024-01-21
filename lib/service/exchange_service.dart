@@ -16,9 +16,10 @@ class ExchangeService {
   Future<CurrencyDB?> getCurrency(String unit) async {
     DateTime date = _getAvailableDate();
     for (int i = 0; i < maxRetryCount; i++) {
-      log("[환율] 로딩.. (${i + 1}차: ${DateFormat("yyyy-MM-dd").format(date)})");
+      final currentDate = date.add(Duration(days: -i));
+      log("[환율] 로딩.. (${i + 1}차: ${DateFormat("yyyy-MM-dd").format(currentDate)})");
       final currency = await _getCurrency(
-        date.add(Duration(days: -i)),
+        currentDate,
         unit,
       );
       if (currency != null) return currency;
