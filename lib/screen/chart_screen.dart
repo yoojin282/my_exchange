@@ -17,19 +17,57 @@ class ChartScreen extends StatefulWidget {
 class _ChartScreenState extends State<ChartScreen> {
   final _service = getIt<ExchangeService>();
 
-  Future<LineChartData> _createChartData(String unit) async {
-    List<CurrencyDB> currencies = await _service.getCurrenciesByUnit(unit);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("환율변동 그래프"),
+      ),
+      body: SafeArea(
+        child: ListView.separated(
+            padding: const EdgeInsets.all(20),
+            itemBuilder: (context, index) {
+              return FutureBuilder(
+                future: _service.getCurrenciesByUnit(availableUnits[index]),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  return _ChartItem(
+                    unit: availableUnits[index],
+                    data: snapshot.requireData,
+                  );
+                },
+              );
+            },
+            separatorBuilder: (context, index) => const SizedBox(height: 20),
+            itemCount: availableUnits.length),
+      ),
+    );
+  }
+}
 
+class _ChartItem extends StatelessWidget {
+  const _ChartItem({required this.unit, required this.data});
+
+  final String unit;
+  final List<CurrencyDB> data;
+
+  LineChartData _createChartData() {
     int index = 0;
     double maxY = 0;
     double minY = double.maxFinite;
     List<FlSpot> spots = [];
     List<DateTime> dates = [];
-    for (final item in currencies) {
-      spots.add(FlSpot((index++).toDouble(), item.rate));
+
+    for (final item in data) {
+      final rate = item.rate.toDouble();
+      spots.add(FlSpot((index++).toDouble(), rate));
       dates.add(item.date);
-      maxY = max(maxY, item.rate);
-      minY = min(minY, item.rate);
+      maxY = max(maxY, rate);
+      minY = min(minY, rate);
     }
 
     maxY *= 1.05;
@@ -38,7 +76,7 @@ class _ChartScreenState extends State<ChartScreen> {
     final barData = LineChartBarData(
       isCurved: true,
       color: Colors.amber,
-      barWidth: 8,
+      barWidth: 5,
       isStrokeCapRound: true,
       dotData: const FlDotData(show: false),
       belowBarData: BarAreaData(show: false),
@@ -50,6 +88,12 @@ class _ChartScreenState extends State<ChartScreen> {
       maxY: maxY.toInt().toDouble(),
       minX: 0,
       maxX: dates.length - 1,
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(color: const Color(0xff37434d)),
+      ),
+      backgroundColor: Colors.black12,
+      gridData: const FlGridData(show: false),
       titlesData: FlTitlesData(
           show: true,
           rightTitles: const AxisTitles(
@@ -60,8 +104,23 @@ class _ChartScreenState extends State<ChartScreen> {
           leftTitles: AxisTitles(
               sideTitles: SideTitles(
             showTitles: true,
+            reservedSize: 50,
             getTitlesWidget: (value, meta) {
-              if (value % 1 == 0) return Text(value.toInt().toString());
+              if (unit == 'USD') {
+                print('$maxY, $value');
+              }
+              if (maxY == value || minY == value) return const SizedBox();
+              if (value %
+                      (maxY > 100
+                          ? 1
+                          : maxY > 1000
+                              ? 10
+                              : 1) ==
+                  0) {
+                return Text(value.toInt().toString());
+              }
+
+              // return Text(value.toInt().toString());
               return const SizedBox();
             },
           )),
@@ -76,32 +135,18 @@ class _ChartScreenState extends State<ChartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("환율변동 그래프"),
-      ),
-      body: SafeArea(
-        child: ListView.separated(
-            padding: const EdgeInsets.all(20),
-            itemBuilder: (context, index) {
-              return AspectRatio(
-                aspectRatio: 1.5,
-                child: FutureBuilder(
-                  future: _createChartData(availableUnits[index]),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (snapshot.hasError) return Text('${snapshot.error}');
-                    return LineChart(snapshot.requireData);
-                  },
-                ),
-              );
-            },
-            separatorBuilder: (context, index) => const SizedBox(height: 20),
-            itemCount: availableUnits.length),
+    return Card(
+      elevation: 1,
+      color: Colors.blueGrey,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        child: Column(
+          children: [
+            Text(unit),
+            const SizedBox(height: 8),
+            AspectRatio(aspectRatio: 1.5, child: LineChart(_createChartData())),
+          ],
+        ),
       ),
     );
   }

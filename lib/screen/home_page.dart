@@ -83,7 +83,9 @@ class MainScreen extends StatelessWidget {
                               ),
                             ),
                           Text(
-                            '환율: ${context.select<HomeProvider, double>((value) => value.rate)} 원',
+                            '환율: ${context.select<HomeProvider, String>(
+                              (value) => value.rate.toStringAsFixed(2),
+                            )} 원',
                             style: const TextStyle(
                               fontSize: 16,
                             ),

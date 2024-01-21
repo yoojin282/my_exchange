@@ -1,3 +1,5 @@
+import 'package:decimal/decimal.dart';
+import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_exchange/get_it.dart';
@@ -12,7 +14,7 @@ class HomeProvider with ChangeNotifier {
 
   late TextEditingController _textController;
   String _currentUnit = 'THB';
-  double _rate = 0;
+  Decimal _rate = Decimal.parse('0');
   DateTime _date = DateTime.now();
   int _totalAmount = 0;
   bool _loading = true;
@@ -21,7 +23,7 @@ class HomeProvider with ChangeNotifier {
 
   TextEditingController get textController => _textController;
   String get currentUnit => _currentUnit;
-  double get rate => _rate;
+  Decimal get rate => _rate;
   int get totalAmount => _totalAmount;
   DateTime get date => _date;
 
@@ -55,6 +57,7 @@ class HomeProvider with ChangeNotifier {
       _date = value.date;
       _currentUnit = value.unit;
       _rate = value.rate;
+      _textController.text = "0";
       _calculate();
     });
   }
@@ -72,24 +75,28 @@ class HomeProvider with ChangeNotifier {
   }
 
   void addPrice(int amount) {
-    int sum = _getInputPrice() + amount;
-    _textController.text = NumberFormat("###,###,###").format(sum);
+    Decimal sum = _getInputPrice() + Decimal.fromInt(amount);
+    _textController.text = NumberFormat("###,###,###").format(DecimalIntl(sum));
     _calculate();
   }
 
   void _calculate() {
-    double realRate = _rate * (_currentUnit.endsWith("(100)") ? 0.01 : 1);
-    int input = _getInputPrice();
-    double result = _reverse ? input / realRate : input * realRate;
-    _totalAmount = result.toInt();
+    Decimal realRate =
+        _rate * Decimal.parse(_currentUnit.endsWith("(100)") ? "0.01" : "1");
+    Decimal input = _getInputPrice();
+
+    Decimal result = _reverse
+        ? (input / realRate).toDecimal(scaleOnInfinitePrecision: 0)
+        : input * realRate;
+    _totalAmount = result.toBigInt().toInt();
     notifyListeners();
   }
 
-  int _getInputPrice() {
+  Decimal _getInputPrice() {
     final strInput = _textController.text.replaceAll(",", "");
-    int input = 0;
+    Decimal input = Decimal.zero;
     if (strInput.isNotEmpty) {
-      input = int.parse(strInput);
+      input = Decimal.parse(strInput);
     }
     return input;
   }

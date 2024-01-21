@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 
 class ExchangeDB {
@@ -37,7 +38,7 @@ class ExchangeDB {
 class CurrencyDB {
   final DateTime date;
   final String unit;
-  final double rate;
+  final Decimal rate;
 
   CurrencyDB({required this.date, required this.rate, required this.unit});
 
@@ -45,7 +46,7 @@ class CurrencyDB {
     return CurrencyDB(
       date: DateTime.parse(json['date']),
       unit: json['unit'],
-      rate: json['rate'],
+      rate: Decimal.fromJson(json['rate']),
     );
   }
 
@@ -53,7 +54,7 @@ class CurrencyDB {
     return {
       "date": DateFormat("yyyy-MM-dd").format(date),
       "unit": unit,
-      "rate": rate,
+      "rate": rate.toStringAsFixed(2),
     };
   }
 
@@ -62,7 +63,7 @@ class CurrencyDB {
     CREATE TABLE $tableName (
       date DATE NOT NULL,
       unit VARCHAR(10) NOT NULL,
-      rate NUMERIC(4, 2) NOT NULL,
+      rate VARCHAR(10) NOT NULL,
       PRIMARY KEY (date, unit),
       CONSTRAINT fk_date FOREIGN KEY(date) REFERENCES ${ExchangeDB.tableName}(date)
     );

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/model/db_models.dart';
@@ -95,7 +96,7 @@ class ExchangeRepository {
       currencies.add(
         CurrencyDB(
           date: date,
-          rate: double.parse((item['tts'] as String).replaceAll(",", "")),
+          rate: Decimal.parse((item['tts'] as String).replaceAll(",", "")),
           unit: item['cur_unit'],
         ),
       );
