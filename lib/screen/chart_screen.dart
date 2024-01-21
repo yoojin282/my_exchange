@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/model/db_models.dart';
@@ -75,15 +76,15 @@ class _ChartItem extends StatelessWidget {
       minY = min(minY, rate);
     }
 
-    maxY *= 1.05;
-    minY *= 0.95;
+    maxY = (maxY * 1.05).toInt().toDouble();
+    minY = (minY * 0.95).toInt().toDouble();
 
     final barData = LineChartBarData(
       isCurved: true,
-      barWidth: 5,
+      barWidth: 3,
       isStrokeCapRound: true,
-      dotData: const FlDotData(show: false),
-      belowBarData: BarAreaData(show: false),
+      dotData: const FlDotData(show: true),
+      belowBarData: BarAreaData(show: true),
       gradient: LinearGradient(
         colors: _gradientColors,
       ),
@@ -91,15 +92,19 @@ class _ChartItem extends StatelessWidget {
     );
     return LineChartData(
       lineBarsData: [barData],
-      minY: minY.toInt().toDouble(),
-      maxY: maxY.toInt().toDouble(),
+      minY: minY,
+      maxY: maxY,
       minX: 0,
       maxX: dates.length - 1,
       borderData: FlBorderData(
         show: true,
         border: Border.all(color: const Color(0xff37434d)),
       ),
-      gridData: const FlGridData(show: false),
+      gridData: const FlGridData(
+        show: true,
+        drawHorizontalLine: true,
+        drawVerticalLine: false,
+      ),
       titlesData: FlTitlesData(
           show: true,
           rightTitles: const AxisTitles(
@@ -112,6 +117,7 @@ class _ChartItem extends StatelessWidget {
             showTitles: true,
             reservedSize: 48,
             getTitlesWidget: (value, meta) {
+              if (value == minY || value == maxY) return const SizedBox();
               return Text(
                 value.toInt().toString(),
                 style: const TextStyle(
@@ -125,14 +131,17 @@ class _ChartItem extends StatelessWidget {
           bottomTitles: AxisTitles(
               sideTitles: SideTitles(
             showTitles: true,
-            getTitlesWidget: (value, meta) => Text(
-              '${dates[value.toInt()].day}일',
-              style: const TextStyle(
-                color: Color(0xff67727d),
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-            ),
+            getTitlesWidget: (value, meta) {
+              if (value % 1 != 0) return const SizedBox();
+              return Text(
+                DateFormat('MM.dd').format(dates[value.toInt()]),
+                style: const TextStyle(
+                  color: Color(0xff67727d),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              );
+            },
           ))),
     );
   }
@@ -143,7 +152,12 @@ class _ChartItem extends StatelessWidget {
       elevation: 1,
       color: const Color(0xff222e38),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        padding: const EdgeInsets.only(
+          top: 10,
+          left: 20,
+          bottom: 10,
+          right: 40,
+        ),
         child: Column(
           children: [
             Text(
