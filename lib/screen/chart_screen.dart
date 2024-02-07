@@ -132,7 +132,7 @@ class _ChartItem extends StatelessWidget {
               sideTitles: SideTitles(
             showTitles: true,
             getTitlesWidget: (value, meta) {
-              if (value % 1 != 0) return const SizedBox();
+              if (value % 2 != 0) return const SizedBox();
               return Text(
                 DateFormat('MM.dd').format(dates[value.toInt()]),
                 style: const TextStyle(
