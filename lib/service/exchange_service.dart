@@ -43,8 +43,9 @@ class ExchangeService {
 
   Future<List<CurrencyDB>> getCurrenciesByUnit(String unit) {
     log('[DB] 일주일간 데이터 가져오기. unit: $unit');
-    final DateTime now = DateTime.now();
+
     if (kDebugMode) {
+      final DateTime now = DateTime.now();
       final random = math.Random();
       final margin = unit == "THB"
           ? 2
@@ -69,8 +70,7 @@ class ExchangeService {
         ],
       );
     }
-    final from = DateTime(now.year, now.month, -7);
-    return _repository.selectListByUnitAndBetween(unit, from: from, to: now);
+    return _repository.selectListByUnitLimit(unit, limit: 7);
   }
 
   DateTime _getAvailableDate() {
