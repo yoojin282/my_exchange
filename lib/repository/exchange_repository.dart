@@ -56,10 +56,20 @@ class ExchangeRepository {
     required int limit,
   }) async {
     final db = await dbProvider.database;
-    final result = await db.query(currencyTableName,
-        columns: ["date", "rate", "unit"], orderBy: "date desc", limit: limit);
+    final result = await db.query(
+      currencyTableName,
+      columns: ["date", "rate", "unit"],
+      where: "unit = ?",
+      whereArgs: [unit],
+      orderBy: "date desc",
+      limit: limit,
+    );
     if (result.isEmpty) return [];
-    return result.map((e) => CurrencyDB.fromJson(e)).toList();
+    final list = result.map((e) => CurrencyDB.fromJson(e)).toList();
+    list.sort(
+      (a, b) => a.date.compareTo(b.date),
+    );
+    return list;
   }
 
   Future<ExchangeDB?> getExchangeRateByDateFromApi(DateTime date) async {
