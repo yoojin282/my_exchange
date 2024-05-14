@@ -1,10 +1,17 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/widgets/debouncer.dart';
 import 'package:translator/translator.dart';
+
+enum _TTSState {
+  playing,
+  stopped,
+}
 
 class TranslateScreen extends StatefulWidget {
   const TranslateScreen({super.key});
@@ -17,13 +24,16 @@ class _TranslateScreenState extends State<TranslateScreen> {
   final _controller = TextEditingController(text: '');
   final _focusNode = FocusNode();
   final _translator = GoogleTranslator();
+  late final FlutterTts _tts;
   late final Debouncer _debouncer;
 
   bool _isSearch = false;
+  _TTSState _ttsState = _TTSState.stopped;
 
-  String _source = "KO";
-  List<String> _target =
-      availableLanguage.where((element) => element != 'KO').toList();
+  String _source = availableLanguage[0];
+  List<String> _target = availableLanguage
+      .where((element) => element != availableLanguage[0])
+      .toList();
 
   String _translated1 = "";
   String _translated2 = "";
@@ -31,7 +41,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
   @override
   void initState() {
     super.initState();
-
+    _initTTS();
     _debouncer = Debouncer(
       milliseconds: 300,
       action: () {
@@ -48,6 +58,63 @@ class _TranslateScreenState extends State<TranslateScreen> {
     _debouncer.dispose();
     super.dispose();
   }
+
+  void _initTTS() {
+    _tts = FlutterTts();
+    _setAwaitOptions();
+    if (Platform.isAndroid) {
+      _tts.setEngine('com.google.android.tts');
+      // _getDefaultEngine();
+      _getDefaultVoice();
+    }
+
+    _tts.setStartHandler(() {
+      setState(() {
+        _ttsState = _TTSState.playing;
+      });
+    });
+    _tts.setCompletionHandler(() {
+      setState(() {
+        _ttsState = _TTSState.stopped;
+      });
+    });
+    _tts.setErrorHandler((msg) {
+      setState(() {
+        log("[TTS] error: $msg");
+        _ttsState = _TTSState.stopped;
+      });
+    });
+  }
+
+  Future<void> _setAwaitOptions() async {
+    await _tts.awaitSpeakCompletion(true);
+  }
+
+  // Future<void> _getDefaultEngine() async {
+  //   var engine = await _tts.getDefaultEngine;
+  //   if (engine != null) {
+  //     print(engine);
+  //   }
+  // }
+
+  Future<void> _getDefaultVoice() async {
+    var voice = await _tts.getDefaultVoice;
+    if (voice != null) {
+      print(voice);
+    }
+  }
+
+  Future<void> _speack(String lang, String text) async {
+    if (text.isEmpty) return;
+
+    _getLanguages()
+        .then((value) => print("======== $value")); // ko-KR, en-US, th-TH
+    // _getDefaultVoice(); // {name: ko-KR-language, locale: ko-KR}
+    // _tts.speak(text);
+  }
+
+  Future<dynamic> _getLanguages() async => await _tts.getLanguages;
+  Future<dynamic> _getEngines() async => await _tts.getEngines;
 
   void _handleChanged(String value) {
     setState(() {
@@ -162,6 +229,8 @@ class _TranslateScreenState extends State<TranslateScreen> {
                       keyboardType: TextInputType.text,
                       focusNode: _focusNode,
                       textInputAction: TextInputAction.search,
+                      minLines: 5,
+                      maxLines: 5,
                       style: const TextStyle(
                         fontSize: 24,
                       ),
@@ -200,6 +269,12 @@ class _TranslateScreenState extends State<TranslateScreen> {
                                 ),
                               ),
                               IconButton(
+                                onPressed: _ttsState == _TTSState.playing
+                                    ? null
+                                    : () => _speack(_target[0], _translated1),
+                                icon: const Icon(Icons.play_circle),
+                              ),
+                              IconButton(
                                 onPressed: () => _copyClipboard(_translated1),
                                 icon: const Icon(Icons.copy),
                               ),
@@ -224,6 +299,12 @@ class _TranslateScreenState extends State<TranslateScreen> {
                                     fontSize: 24,
                                   ),
                                 ),
+                              ),
+                              IconButton(
+                                onPressed: _ttsState == _TTSState.playing
+                                    ? null
+                                    : () => _speack(_target[1], _translated2),
+                                icon: const Icon(Icons.play_circle),
                               ),
                               IconButton(
                                 onPressed: () => _copyClipboard(_translated2),
