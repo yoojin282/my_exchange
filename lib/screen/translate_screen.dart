@@ -131,14 +131,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
   }
 
   void _copyClipboard(String value) {
-    Clipboard.setData(ClipboardData(text: value)).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(seconds: 1),
-          content: Text('클립보드에 복사했습니다.'),
-        ),
-      );
-    });
+    Clipboard.setData(ClipboardData(text: value));
   }
 
   @override
