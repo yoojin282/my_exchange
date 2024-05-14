@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/provider/home_provider.dart';
 import 'package:my_exchange/screen/chart_screen.dart';
+import 'package:my_exchange/screen/translate_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:tuple/tuple.dart';
@@ -51,12 +52,21 @@ class MainScreen extends StatelessWidget {
                   : null,
           actions: [
             IconButton(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChartScreen(),
-                    )),
-                icon: const Icon(Icons.bar_chart))
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TranslateScreen(),
+                  )),
+              icon: const Icon(Icons.g_translate),
+            ),
+            IconButton(
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChartScreen(),
+                  )),
+              icon: const Icon(Icons.bar_chart),
+            ),
           ],
         ),
         body: SafeArea(
