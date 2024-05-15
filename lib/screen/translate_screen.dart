@@ -29,9 +29,9 @@ class _TranslateScreenState extends State<TranslateScreen> {
 
   bool _isSearch = false;
   _TTSState _ttsState = _TTSState.stopped;
-  bool _isKoreanInstalled = Platform.isIOS;
-  bool _isEnglishInstalled = Platform.isIOS;
-  bool _isThaiInstalled = Platform.isIOS;
+  // bool _isKoreanInstalled = true;
+  // bool _isEnglishInstalled = true;
+  // bool _isThaiInstalled = true;
 
   String _source = availableLanguage[0];
   List<String> _target = availableLanguage
@@ -67,21 +67,22 @@ class _TranslateScreenState extends State<TranslateScreen> {
     _tts = FlutterTts();
     _setAwaitOptions();
     if (Platform.isAndroid) {
-      _tts.setEngine('com.google.android.tts').then(
-        (engine) {
-          Future.wait([
-            _tts.isLanguageInstalled('ko-KR'),
-            _tts.isLanguageInstalled('en-US'),
-            _tts.isLanguageInstalled('th-TH')
-          ]).then(
-            (value) => setState(() {
-              _isKoreanInstalled = value[0];
-              _isEnglishInstalled = value[1];
-              _isThaiInstalled = value[2];
-            }),
-          );
-        },
-      );
+      // _tts.setEngine('com.google.android.tts').then(
+      //   (engine) {
+      //     Future.wait([
+      //       _tts.isLanguageInstalled('ko-KR'),
+      //       _tts.isLanguageInstalled('en-US'),
+      //       _tts.isLanguageInstalled('th-TH')
+      //     ]).then(
+      //       (value) => setState(() {
+      //         _isKoreanInstalled = value[0];
+      //         _isEnglishInstalled = value[1];
+      //         _isThaiInstalled = value[2];
+      //       }),
+      //     );
+      //   },
+      // );
+
       // _getDefaultEngine();
       // _getDefaultVoice();
     }
@@ -235,11 +236,11 @@ class _TranslateScreenState extends State<TranslateScreen> {
     Clipboard.setData(ClipboardData(text: value));
   }
 
-  bool _isInstalledLanguage(String lang) {
-    if (lang == 'TH') return _isThaiInstalled;
-    if (lang == 'EN') return _isEnglishInstalled;
-    return _isKoreanInstalled;
-  }
+  // bool _isInstalledLanguage(String lang) {
+  //   if (lang == 'TH') return _isThaiInstalled;
+  //   if (lang == 'EN') return _isEnglishInstalled;
+  //   return _isKoreanInstalled;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -311,7 +312,8 @@ class _TranslateScreenState extends State<TranslateScreen> {
                               ),
                               _TTSButton(
                                 language: _target[0],
-                                isInstalled: _isInstalledLanguage(_target[0]),
+                                // isInstalled: _isInstalledLanguage(_target[0]),
+                                isInstalled: true,
                                 state: _ttsState,
                                 onPlay: () => _speack(_target[0], _translated1),
                               ),
@@ -343,7 +345,8 @@ class _TranslateScreenState extends State<TranslateScreen> {
                               ),
                               _TTSButton(
                                 language: _target[1],
-                                isInstalled: _isInstalledLanguage(_target[1]),
+                                // isInstalled: _isInstalledLanguage(_target[1]),
+                                isInstalled: true,
                                 state: _ttsState,
                                 onPlay: () => _speack(_target[1], _translated2),
                               ),
