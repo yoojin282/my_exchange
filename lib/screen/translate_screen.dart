@@ -67,21 +67,22 @@ class _TranslateScreenState extends State<TranslateScreen> {
     _tts = FlutterTts();
     _setAwaitOptions();
     if (Platform.isAndroid) {
-      // _tts.setEngine('com.google.android.tts').then(
-      //   (engine) {
-      //     Future.wait([
-      //       _tts.isLanguageInstalled('ko-KR'),
-      //       _tts.isLanguageInstalled('en-US'),
-      //       _tts.isLanguageInstalled('th-TH')
-      //     ]).then(
-      //       (value) => setState(() {
-      //         _isKoreanInstalled = value[0];
-      //         _isEnglishInstalled = value[1];
-      //         _isThaiInstalled = value[2];
-      //       }),
-      //     );
-      //   },
-      // );
+      _tts.setEngine('com.google.android.tts').then(
+        (engine) {
+          // Future.wait([
+          //   _tts.isLanguageInstalled('ko-KR'),
+          //   _tts.isLanguageInstalled('en-US'),
+          //   _tts.isLanguageInstalled('th-TH')
+          // ]).then(
+          //   (value) => setState(() {
+          //     _isKoreanInstalled = value[0];
+          //     _isEnglishInstalled = value[1];
+          //     _isThaiInstalled = value[2];
+          //   }),
+          // );
+          // _tts.getVoices.then((value) => print(value));
+        },
+      );
 
       // _getDefaultEngine();
       // _getDefaultVoice();
