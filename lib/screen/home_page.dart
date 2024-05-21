@@ -42,250 +42,251 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => HomeProvider(),
-      builder: (context, child) => Scaffold(
-        appBar: AppBar(
-          title: const Text("환율여행"),
-          centerTitle: true,
-          leading:
-              context.select<HomeProvider, bool>((value) => value.isLoading)
-                  ? const _RefreshIcon()
-                  : null,
-          actions: [
-            IconButton(
-              onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TranslateScreen(),
-                  )),
-              icon: const Icon(Icons.g_translate),
-            ),
-            IconButton(
-              onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChartScreen(),
-                  )),
-              icon: const Icon(Icons.bar_chart),
-            ),
-          ],
-        ),
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (!context.select<HomeProvider, bool>(
-                              (value) => value.isLoading))
+      builder: (context, child) {
+        // final theme = Theme.of(context);
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("환율여행"),
+            centerTitle: false,
+            leading:
+                context.select<HomeProvider, bool>((value) => value.isLoading)
+                    ? const _RefreshIcon()
+                    : null,
+            actions: [
+              IconButton(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TranslateScreen(),
+                    )),
+                icon: const Icon(Icons.g_translate),
+              ),
+              IconButton(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChartScreen(),
+                    )),
+                icon: const Icon(Icons.bar_chart),
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (!context.select<HomeProvider, bool>(
+                                (value) => value.isLoading))
+                              Text(
+                                '환율발표: ${DateFormat('MM월 dd일').format(
+                                  context.select<HomeProvider, DateTime>(
+                                      (value) => value.date),
+                                )}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
                             Text(
-                              '환율발표: ${DateFormat('MM월 dd일').format(
-                                context.select<HomeProvider, DateTime>(
-                                    (value) => value.date),
-                              )}',
+                              '환율: ${context.select<HomeProvider, String>(
+                                (value) => value.rate.toStringAsFixed(2),
+                              )} 원',
                               style: const TextStyle(
                                 fontSize: 16,
                               ),
                             ),
-                          Text(
-                            '환율: ${context.select<HomeProvider, String>(
-                              (value) => value.rate.toStringAsFixed(2),
-                            )} 원',
-                            style: const TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Selector<HomeProvider, Tuple2<String, bool>>(
-                            builder: (context, value, child) => Row(
-                              children: [
-                                Text(
-                                  value.item2
-                                      ? "KRW"
-                                      : value.item1.replaceAll("(100)", ""),
-                                  style: const TextStyle(
-                                    fontSize: 18,
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Selector<HomeProvider, Tuple2<String, bool>>(
+                              builder: (context, value, child) => Row(
+                                children: [
+                                  Text(
+                                    value.item2
+                                        ? "KRW"
+                                        : value.item1.replaceAll("(100)", ""),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                    ),
                                   ),
-                                ),
-                                IconButton(
-                                  icon:
-                                      const Icon(Icons.swap_horizontal_circle),
-                                  onPressed: () => context
-                                      .read<HomeProvider>()
-                                      .toggleReverse(),
-                                ),
-                                const SizedBox(
-                                  width: 4,
-                                ),
-                                Text(
-                                  value.item2
-                                      ? value.item1.replaceAll("(100)", "")
-                                      : "KRW",
-                                  style: const TextStyle(
-                                    fontSize: 18,
+                                  IconButton(
+                                    icon: const Icon(
+                                        Icons.swap_horizontal_circle),
+                                    onPressed: () => context
+                                        .read<HomeProvider>()
+                                        .toggleReverse(),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(
+                                    width: 4,
+                                  ),
+                                  Text(
+                                    value.item2
+                                        ? value.item1.replaceAll("(100)", "")
+                                        : "KRW",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              selector: (p0, p1) =>
+                                  Tuple2(p1.currentUnit, p1.isReverse),
                             ),
-                            selector: (p0, p1) =>
-                                Tuple2(p1.currentUnit, p1.isReverse),
+                            OutlinedButton(
+                              onPressed: () => _showUnitDialog(context),
+                              style: OutlinedButton.styleFrom(
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8))),
+                                padding:
+                                    const EdgeInsets.only(right: 5, left: 16),
+                              ),
+                              child: Row(children: [
+                                Text(
+                                  context
+                                      .select<HomeProvider, String>(
+                                          (value) => value.currentUnit)
+                                      .replaceAll("(100)", ""),
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                                const Icon(
+                                  Icons.arrow_drop_down,
+                                ),
+                              ]),
+                            )
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Selector<HomeProvider, bool>(
+                        builder: (context, value, child) => SizedBox(
+                          height: 30,
+                          child: ListView.separated(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              int amount = value
+                                  ? reverseShortcuts[index]
+                                  : shortcuts[index];
+                              return _ShortcutPrice(
+                                amount: amount,
+                                onTab: () => context
+                                    .read<HomeProvider>()
+                                    .addPrice(amount),
+                              );
+                            },
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 6),
+                            itemCount: value
+                                ? reverseShortcuts.length
+                                : shortcuts.length,
                           ),
-                          OutlinedButton(
-                            onPressed: () => _showUnitDialog(context),
-                            style: OutlinedButton.styleFrom(
-                              shape: const RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(8))),
-                              padding:
-                                  const EdgeInsets.only(right: 5, left: 16),
+                        ),
+                        selector: (p0, p1) => p1.isReverse,
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: TextField(
+                          controller: context
+                              .select<HomeProvider, TextEditingController>(
+                                  (value) => value.textController),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            CommaSeparatorInputFormatter(),
+                          ],
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(children: [
-                              Text(
-                                context
+                            hintText: "원하시는 금액을 입력하세요.",
+                            suffix: Text(context.select<HomeProvider, bool>(
+                                    (value) => value.isReverse)
+                                ? 'KRW'
+                                : context
                                     .select<HomeProvider, String>(
                                         (value) => value.currentUnit)
-                                    .replaceAll("(100)", ""),
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              const Icon(
-                                Icons.arrow_drop_down,
-                              ),
-                            ]),
-                          )
-                        ],
+                                    .replaceAll("(100)", "")),
+                            suffixIcon: context.select<HomeProvider, bool>(
+                                    (value) =>
+                                        value.textController.text.isEmpty)
+                                ? null
+                                : IconButton(
+                                    onPressed: () => context
+                                        .read<HomeProvider>()
+                                        .clearInput(),
+                                    icon: const Icon(
+                                      Icons.cancel,
+                                    ),
+                                  ),
+                          ),
+                          textInputAction: TextInputAction.done,
+                          onChanged: context.select<HomeProvider, bool>(
+                                  (value) => value.isLoading)
+                              ? null
+                              : (_) =>
+                                  context.read<HomeProvider>().onInputChanged(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Selector<HomeProvider, bool>(
-                      builder: (context, value, child) => SizedBox(
-                        height: 30,
-                        child: ListView.separated(
+                      Expanded(
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            int amount = value
-                                ? reverseShortcuts[index]
-                                : shortcuts[index];
-                            return _ShortcutPrice(
-                              amount: amount,
-                              onTab: () =>
-                                  context.read<HomeProvider>().addPrice(amount),
-                            );
-                          },
-                          separatorBuilder: (_, __) => const SizedBox(width: 6),
-                          itemCount: value
-                              ? reverseShortcuts.length
-                              : shortcuts.length,
-                        ),
-                      ),
-                      selector: (p0, p1) => p1.isReverse,
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: context
-                                  .select<HomeProvider, TextEditingController>(
-                                      (value) => value.textController),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                CommaSeparatorInputFormatter(),
-                              ],
-                              style: const TextStyle(fontSize: 16),
-                              decoration: InputDecoration(
-                                  hintText: "원하시는 금액을 입력하세요.",
-                                  suffix: Text(
-                                      context.select<HomeProvider, bool>(
-                                              (value) => value.isReverse)
-                                          ? 'KRW'
-                                          : context
-                                              .select<HomeProvider, String>(
-                                                  (value) => value.currentUnit)
-                                              .replaceAll("(100)", "")),
-                                  suffixIcon: context
-                                          .select<HomeProvider, bool>((value) =>
-                                              value.textController.text.isEmpty)
-                                      ? null
-                                      : IconButton(
-                                          onPressed: () => context
-                                              .read<HomeProvider>()
-                                              .clearInput(),
-                                          icon: const Icon(
-                                            Icons.cancel,
-                                          ),
-                                        )),
-                              textInputAction: TextInputAction.done,
-                              onChanged: context.select<HomeProvider, bool>(
-                                      (value) => value.isLoading)
-                                  ? null
-                                  : (_) => context
-                                      .read<HomeProvider>()
-                                      .onInputChanged(),
+                          child: Center(
+                            child: Selector<HomeProvider,
+                                Tuple3<bool, String, int>>(
+                              builder: (context, value, child) => Text(
+                                '${NumberFormat("###,###,###").format(value.item3)} ${value.item1 ? value.item2.replaceAll("(100)", "") : "원"}',
+                                style: const TextStyle(fontSize: 48),
+                              ),
+                              selector: (p0, p1) => Tuple3(
+                                  p1.isReverse, p1.currentUnit, p1.totalAmount),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Center(
-                          child:
-                              Selector<HomeProvider, Tuple3<bool, String, int>>(
-                            builder: (context, value, child) => Text(
-                              '${NumberFormat("###,###,###").format(value.item3)} ${value.item1 ? value.item2.replaceAll("(100)", "") : "원"}',
-                              style: const TextStyle(fontSize: 48),
-                            ),
-                            selector: (p0, p1) => Tuple3(
-                                p1.isReverse, p1.currentUnit, p1.totalAmount),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              if (context.select<HomeProvider, bool>((value) => value.hasError))
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    color: Colors.red,
-                    child: const Text(
-                      "환율정보 불러오기에 실패했습니다. 잠시후 다시 시도해 주세요.",
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                    ),
+                    ],
                   ),
-                )
-            ],
+                ),
+                if (context
+                    .select<HomeProvider, bool>((value) => value.hasError))
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      color: Colors.red,
+                      child: const Text(
+                        "환율정보 불러오기에 실패했습니다. 잠시후 다시 시도해 주세요.",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                    ),
+                  )
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
