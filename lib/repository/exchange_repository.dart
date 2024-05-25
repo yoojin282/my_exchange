@@ -75,7 +75,7 @@ class ExchangeRepository {
   Future<ExchangeDB?> getExchangeRateByDateFromApi(DateTime date) async {
     late final List<dynamic> result;
     final url =
-        '$apiUrl?authkey=$apiKey&searchdate=${DateFormat('yyyyMMdd').format(date)}&data=AP01';
+        '$apiUrl?authkey=${Constants.apiKey}&searchdate=${DateFormat('yyyyMMdd').format(date)}&data=AP01';
     try {
       final res = await http.get(
         Uri.parse(url),
