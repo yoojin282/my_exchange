@@ -1,8 +1,5 @@
 import 'dart:developer';
-import 'dart:math' as math;
 
-import 'package:decimal/decimal.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/model/db_models.dart';
@@ -43,33 +40,6 @@ class ExchangeService {
 
   Future<List<CurrencyDB>> getCurrenciesByUnit(String unit) {
     log('[DB] 일주일간 데이터 가져오기. unit: $unit');
-
-    if (kDebugMode) {
-      final DateTime now = DateTime.now();
-      final random = math.Random();
-      final margin = unit == "THB"
-          ? 2
-          : unit == "USD"
-              ? 100
-              : 50;
-      final base = unit == "THB"
-          ? 36
-          : unit == "USD"
-              ? 1300
-              : 950;
-      return Future.delayed(
-        const Duration(seconds: 1),
-        () => [
-          for (int i = 0; i < 7; i++)
-            CurrencyDB(
-              date: now.add(Duration(days: (i - 7))),
-              rate: Decimal.parse(
-                  (base + (random.nextDouble() * margin)).toStringAsFixed(2)),
-              unit: unit,
-            )
-        ],
-      );
-    }
     return _repository.selectListByUnitLimit(unit, limit: 7);
   }
 
