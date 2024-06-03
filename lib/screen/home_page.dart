@@ -86,7 +86,7 @@ class MainScreen extends StatelessWidget {
                             if (!context.select<HomeProvider, bool>(
                                 (value) => value.isLoading))
                               Text(
-                                '환율발표: ${DateFormat('MM월 dd일').format(
+                                '발표: ${DateFormat('MM월 dd일').format(
                                   context.select<HomeProvider, DateTime>(
                                       (value) => value.date),
                                 )}',

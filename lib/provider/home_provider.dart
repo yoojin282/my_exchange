@@ -76,7 +76,8 @@ class HomeProvider with ChangeNotifier {
 
   void addPrice(int amount) {
     Decimal sum = _getInputPrice() + Decimal.fromInt(amount);
-    _textController.text = NumberFormat("###,###,###").format(DecimalIntl(sum));
+    _textController.text =
+        DecimalFormatter(NumberFormat("###,###,###")).format(sum);
     _calculate();
   }
 
