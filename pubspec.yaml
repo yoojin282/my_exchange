@@ -3,10 +3,10 @@ description: 나의 환율정보
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.1.0+3
+version: 1.2.0+4
 
 environment:
-  sdk: '>=3.4.1 <4.0.0'
+  sdk: '>=3.4.3 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -29,7 +29,7 @@ dependencies:
   provider: ^6.1.2
   tuple: ^2.0.2
   fl_chart: ^0.68.0
-  decimal: ^3.0.1
+  decimal: ^3.0.2
   translator: ^1.0.0
   flutter_tts: ^4.0.2
 
