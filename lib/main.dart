@@ -1,14 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/screen/home_page.dart';
 import 'package:my_exchange/theme.dart';
 
 Future<void> main() async {
   initializeGetIt();
-  HttpOverrides.global = NoCheckCerfiticationHttpOverrides();
+  // HttpOverrides.global = NoCheckCerfiticationHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
+  final data = await PlatformAssetBundle().load('certs/lets-encrypt-r3.pem');
+  SecurityContext.defaultContext
+      .setTrustedCertificatesBytes(data.buffer.asUint8List());
   runApp(const MyApp());
 }
 
@@ -34,10 +38,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class NoCheckCerfiticationHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (cert, host, port) => true;
-  }
-}
+// class NoCheckCerfiticationHttpOverrides extends HttpOverrides {
+//   @override
+//   HttpClient createHttpClient(SecurityContext? context) {
+//     return super.createHttpClient(context)
+//       ..badCertificateCallback = (cert, host, port) => true;
+//   }
+// }
