@@ -73,28 +73,29 @@ class ExchangeRepository {
   }
 
   Future<ExchangeDB?> getExchangeRateByDateFromApi(DateTime date) async {
-    late final List<dynamic> result;
+    late final Map<String, dynamic> result;
     final url =
-        '$apiUrl?authkey=${Constants.apiKey}&searchdate=${DateFormat('yyyyMMdd').format(date)}&data=AP01';
+        '$apiUrl/${DateFormat('yyyy-MM-dd').format(date)}?symbols=${availableUnits.join(',')}&base=$baseUnit';
     try {
-      final res = await http.get(
-        Uri.parse(url),
-      );
-      result = convert.jsonDecode(convert.utf8.decode(res.bodyBytes))
-          as List<dynamic>;
+      final res = await http.get(Uri.parse(url), headers: {
+        'apikey': Constants.apiKey,
+      });
+      result = convert.jsonDecode(convert.utf8.decode(res.bodyBytes));
     } catch (e) {
       log("[에러] ${e.toString()}");
       return null;
     }
-    if (result.isEmpty) return null;
+    if (!result['success']) return null;
 
     List<CurrencyDB> currencies = [];
-    for (var item in result) {
+    for (var item in (result['rates'] as Map<String, dynamic>).entries) {
+      final rate = 1 / item.value;
       currencies.add(
         CurrencyDB(
           date: date,
-          rate: Decimal.parse((item['tts'] as String).replaceAll(",", "")),
-          unit: item['cur_unit'],
+          rate: Decimal.parse(
+              rate > 99 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(2)),
+          unit: item.key,
         ),
       );
     }

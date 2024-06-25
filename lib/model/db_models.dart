@@ -46,7 +46,7 @@ class CurrencyDB {
     return CurrencyDB(
       date: DateTime.parse(json['date']),
       unit: json['unit'],
-      rate: Decimal.fromJson(json['rate']),
+      rate: Decimal.parse(json['rate']),
     );
   }
 
