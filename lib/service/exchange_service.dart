@@ -11,7 +11,7 @@ class ExchangeService {
   final _repository = getIt<ExchangeRepository>();
 
   Future<CurrencyDB?> getCurrency(String unit) async {
-    DateTime date = _getAvailableDate();
+    DateTime date = DateTime.now();
     for (int i = 0; i < maxRetryCount; i++) {
       final currentDate = date.add(Duration(days: -i));
       log("[환율] 로딩.. (${i + 1}차: ${DateFormat("yyyy-MM-dd").format(currentDate)})");
@@ -41,16 +41,5 @@ class ExchangeService {
   Future<List<CurrencyDB>> getCurrenciesByUnit(String unit) {
     log('[DB] 일주일간 데이터 가져오기. unit: $unit');
     return _repository.selectListByUnitLimit(unit, limit: 7);
-  }
-
-  DateTime _getAvailableDate() {
-    DateTime now = DateTime.now();
-    int day = now.weekday;
-    if (day == DateTime.sunday) {
-      return now.add(const Duration(days: -2));
-    } else if (day == DateTime.saturday) {
-      return now.add(const Duration(days: -1));
-    }
-    return now;
   }
 }

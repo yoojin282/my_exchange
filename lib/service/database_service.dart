@@ -5,7 +5,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseService {
-  final version = 1;
+  final version = 2;
   final String _dbName = "exchange.db";
   static final DatabaseService provider = DatabaseService();
   Database? _database;
@@ -46,7 +46,14 @@ class DatabaseService {
 
   void _onUpgrade(Database database, int oldVersion, int newVersion) {
     if (newVersion > oldVersion) {
-      // migration here
+      if (newVersion == 2) {
+        log("[DB] JPY 데이터 제거");
+        database.delete(
+          CurrencyDB.tableName,
+          where: "unit = ?",
+          whereArgs: ["JPY(100)"],
+        );
+      }
     }
   }
 }

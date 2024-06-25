@@ -117,9 +117,7 @@ class MainScreen extends StatelessWidget {
                               builder: (context, value, child) => Row(
                                 children: [
                                   Text(
-                                    value.item2
-                                        ? "KRW"
-                                        : value.item1.replaceAll("(100)", ""),
+                                    value.item2 ? "KRW" : value.item1,
                                     style: const TextStyle(
                                       fontSize: 18,
                                     ),
@@ -135,9 +133,7 @@ class MainScreen extends StatelessWidget {
                                     width: 4,
                                   ),
                                   Text(
-                                    value.item2
-                                        ? value.item1.replaceAll("(100)", "")
-                                        : "KRW",
+                                    value.item2 ? value.item1 : "KRW",
                                     style: const TextStyle(
                                       fontSize: 18,
                                     ),
@@ -158,10 +154,8 @@ class MainScreen extends StatelessWidget {
                               ),
                               child: Row(children: [
                                 Text(
-                                  context
-                                      .select<HomeProvider, String>(
-                                          (value) => value.currentUnit)
-                                      .replaceAll("(100)", ""),
+                                  context.select<HomeProvider, String>(
+                                      (value) => value.currentUnit),
                                   style: const TextStyle(fontSize: 18),
                                 ),
                                 const Icon(
@@ -220,13 +214,13 @@ class MainScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             hintText: "원하시는 금액을 입력하세요.",
-                            suffix: Text(context.select<HomeProvider, bool>(
-                                    (value) => value.isReverse)
-                                ? 'KRW'
-                                : context
-                                    .select<HomeProvider, String>(
-                                        (value) => value.currentUnit)
-                                    .replaceAll("(100)", "")),
+                            suffix: Text(
+                              context.select<HomeProvider, bool>(
+                                      (value) => value.isReverse)
+                                  ? 'KRW'
+                                  : context.select<HomeProvider, String>(
+                                      (value) => value.currentUnit),
+                            ),
                             suffixIcon: context.select<HomeProvider, bool>(
                                     (value) =>
                                         value.textController.text.isEmpty)
@@ -255,7 +249,7 @@ class MainScreen extends StatelessWidget {
                             child: Selector<HomeProvider,
                                 Tuple3<bool, String, int>>(
                               builder: (context, value, child) => Text(
-                                '${NumberFormat("###,###,###").format(value.item3)} ${value.item1 ? value.item2.replaceAll("(100)", "") : "원"}',
+                                '${NumberFormat("###,###,###").format(value.item3)} ${value.item1 ? value.item2 : "원"}',
                                 style: const TextStyle(fontSize: 48),
                               ),
                               selector: (p0, p1) => Tuple3(
