@@ -1,4 +1,4 @@
-const apiUrl = 'https://api.apilayer.com/exchangerates_data';
+const apiHost = 'api.apilayer.com';
 const baseUnit = 'KRW';
 const availableUnits = ['THB', 'USD'];
 const availableLanguage = ['KO', 'TH', "EN"];

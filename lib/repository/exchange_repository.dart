@@ -74,10 +74,13 @@ class ExchangeRepository {
 
   Future<ExchangeDB?> getExchangeRateByDateFromApi(DateTime date) async {
     late final Map<String, dynamic> result;
-    final url =
-        '$apiUrl/${DateFormat('yyyy-MM-dd').format(date)}?symbols=${availableUnits.join(',')}&base=$baseUnit';
+    final paramDate = DateFormat('yyyy-MM-dd').format(date);
+    final queryParams = {'symbols': availableUnits.join(','), 'base': baseUnit};
+    final uri =
+        Uri.https(apiHost, '/exchangerates_data/$paramDate', queryParams);
+
     try {
-      final res = await http.get(Uri.parse(url), headers: {
+      final res = await http.get(uri, headers: {
         'apikey': Constants.apiKey,
       });
       result = convert.jsonDecode(convert.utf8.decode(res.bodyBytes));
@@ -85,6 +88,7 @@ class ExchangeRepository {
       log("[에러] ${e.toString()}");
       return null;
     }
+
     if (!result['success']) return null;
 
     List<CurrencyDB> currencies = [];
