@@ -77,6 +77,7 @@ class MainScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Column(
+                    spacing: 16,
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -104,9 +105,6 @@ class MainScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(
-                        height: 8,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -166,9 +164,6 @@ class MainScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 8,
-                      ),
                       Selector<HomeProvider, bool>(
                         builder: (context, value, child) => SizedBox(
                           height: 30,
@@ -187,16 +182,13 @@ class MainScreen extends StatelessWidget {
                               );
                             },
                             separatorBuilder: (_, __) =>
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 8),
                             itemCount: value
                                 ? reverseShortcuts.length
                                 : shortcuts.length,
                           ),
                         ),
                         selector: (p0, p1) => p1.isReverse,
-                      ),
-                      const SizedBox(
-                        height: 16,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
