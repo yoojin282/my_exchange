@@ -18,7 +18,7 @@ val keystoreProperties = Properties().apply {
 android {
     namespace = "com.yoojin282.my_exchange"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.0.13004108"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
