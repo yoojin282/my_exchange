@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,27 +7,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader("UTF-8") { reader ->
-        localProperties.load(reader)
-    }
-}
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file("key.properties")
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
 }
 
-def flutterVersionCode = localProperties.getProperty("flutter.versionCode)
-if (flutterVersionCode == null) {
-    flutterVersionCode = "1"
-}
-
-def flutterVersionName = localProperties.getProperty("flutter.versionName")
-if (flutterVersionName == null) {
-    flutterVersionName = "1.0"
+val keystoreProperties = Properties().apply {
+    load(rootProject.file("key.properties").inputStream())
 }
 
 android {
@@ -49,16 +36,16 @@ android {
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdk = 26
         targetSdk = 35
-        versionCode = flutterVersionCode.toInteger()
-        versionName = flutterVersionName
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     signingConfigs {
-        release {
-            keyAlias = keystoreProperties.getByName("keyAlias")
-            keyPassword = keystoreProperties.getByName("keyPassword")
-            storeFile = keystoreProperties.getByName("storeFile") ? file(keystoreProperties.getByName("storeFile")) : null
-            storePassword = keystoreProperties.getByName("storePassword")
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            storeFile = if(keystoreProperties.getProperty("storeFile") != null) file(keystoreProperties.getProperty("storeFile")) else null
+            storePassword = keystoreProperties.getProperty("storePassword")
         }
     }
 
