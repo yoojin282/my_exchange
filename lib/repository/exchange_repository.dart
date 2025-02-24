@@ -66,9 +66,7 @@ class ExchangeRepository {
     );
     if (result.isEmpty) return [];
     final list = result.map((e) => CurrencyDB.fromJson(e)).toList();
-    list.sort(
-      (a, b) => a.date.compareTo(b.date),
-    );
+    list.sort((a, b) => a.date.compareTo(b.date));
     return list;
   }
 
@@ -76,13 +74,14 @@ class ExchangeRepository {
     late final Map<String, dynamic> result;
     final paramDate = DateFormat('yyyy-MM-dd').format(date);
     final queryParams = {'symbols': availableUnits.join(','), 'base': baseUnit};
-    final uri =
-        Uri.https(apiHost, '/exchangerates_data/$paramDate', queryParams);
+    final uri = Uri.https(
+      apiHost,
+      '/exchangerates_data/$paramDate',
+      queryParams,
+    );
 
     try {
-      final res = await http.get(uri, headers: {
-        'apikey': Constants.apiKey,
-      });
+      final res = await http.get(uri, headers: {'apikey': Constants.apiKey});
       result = convert.jsonDecode(convert.utf8.decode(res.bodyBytes));
     } catch (e) {
       log("[에러] ${e.toString()}");
@@ -98,7 +97,8 @@ class ExchangeRepository {
         CurrencyDB(
           date: date,
           rate: Decimal.parse(
-              rate > 99 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(2)),
+            rate > 99 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(2),
+          ),
           unit: item.key,
         ),
       );
@@ -108,5 +108,19 @@ class ExchangeRepository {
       currencies: currencies,
       createdAt: DateTime.now(),
     );
+  }
+
+  Future<CurrencyDB?> selectLastByUnit(String unit) async {
+    final db = await dbProvider.database;
+    final result = await db.query(
+      currencyTableName,
+      columns: ["date", "unit", "rate"],
+      where: "unit = ?",
+      whereArgs: [unit],
+      orderBy: "date desc",
+      limit: 1,
+    );
+    if (result.isEmpty) return null;
+    return CurrencyDB.fromJson(result[0]);
   }
 }
