@@ -17,22 +17,30 @@ class MainScreen extends StatelessWidget {
     showModalBottomSheet(
       context: originContext,
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var unit in availableUnits)
-              InkWell(
-                onTap: () {
-                  // _changeUnit(unit);
-                  provider.setCurrentUnit(unit);
-                  Navigator.pop(context);
-                },
-                child: _UnitItem(
-                  unit: unit,
-                  selected: provider.currentUnit == unit,
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < availableUnits.length; i++)
+                InkWell(
+                  borderRadius:
+                      i == 0
+                          ? BorderRadius.vertical(top: Radius.circular(28))
+                          : i == availableUnits.length - 1
+                          ? BorderRadius.vertical(bottom: Radius.circular(8))
+                          : null,
+                  onTap: () {
+                    // _changeUnit(unit);
+                    provider.setCurrentUnit(availableUnits[i]);
+                    Navigator.pop(context);
+                  },
+                  child: _UnitItem(
+                    unit: availableUnits[i],
+                    selected: provider.currentUnit == availableUnits[i],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -54,19 +62,23 @@ class MainScreen extends StatelessWidget {
                     : null,
             actions: [
               IconButton(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TranslateScreen(),
-                    )),
+                onPressed:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TranslateScreen(),
+                      ),
+                    ),
                 icon: const Icon(Icons.g_translate),
               ),
               IconButton(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChartScreen(),
-                    )),
+                onPressed:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChartScreen(),
+                      ),
+                    ),
                 icon: const Icon(Icons.bar_chart),
               ),
             ],
@@ -85,23 +97,15 @@ class MainScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             if (!context.select<HomeProvider, bool>(
-                                (value) => value.isLoading))
+                              (value) => value.isLoading,
+                            ))
                               Text(
-                                '발표: ${DateFormat('MM월 dd일').format(
-                                  context.select<HomeProvider, DateTime>(
-                                      (value) => value.date),
-                                )}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                ),
+                                '발표: ${DateFormat('MM월 dd일').format(context.select<HomeProvider, DateTime>((value) => value.date))}',
+                                style: const TextStyle(fontSize: 16),
                               ),
                             Text(
-                              '환율: ${context.select<HomeProvider, String>(
-                                (value) => value.rate.toStringAsFixed(2),
-                              )} 원',
-                              style: const TextStyle(
-                                fontSize: 16,
-                              ),
+                              '환율: ${context.select<HomeProvider, String>((value) => value.rate.toStringAsFixed(2))} 원',
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ],
                         ),
@@ -112,82 +116,92 @@ class MainScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Selector<HomeProvider, Tuple2<String, bool>>(
-                              builder: (context, value, child) => Row(
-                                children: [
-                                  Text(
-                                    value.item2 ? "KRW" : value.item1,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                    ),
+                              builder:
+                                  (context, value, child) => Row(
+                                    children: [
+                                      Text(
+                                        value.item2 ? "KRW" : value.item1,
+                                        style: const TextStyle(fontSize: 18),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.swap_horizontal_circle,
+                                        ),
+                                        onPressed:
+                                            () =>
+                                                context
+                                                    .read<HomeProvider>()
+                                                    .toggleReverse(),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        value.item2 ? value.item1 : "KRW",
+                                        style: const TextStyle(fontSize: 18),
+                                      ),
+                                    ],
                                   ),
-                                  IconButton(
-                                    icon: const Icon(
-                                        Icons.swap_horizontal_circle),
-                                    onPressed: () => context
-                                        .read<HomeProvider>()
-                                        .toggleReverse(),
-                                  ),
-                                  const SizedBox(
-                                    width: 4,
-                                  ),
-                                  Text(
-                                    value.item2 ? value.item1 : "KRW",
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              selector: (p0, p1) =>
-                                  Tuple2(p1.currentUnit, p1.isReverse),
+                              selector:
+                                  (p0, p1) =>
+                                      Tuple2(p1.currentUnit, p1.isReverse),
                             ),
                             OutlinedButton(
                               onPressed: () => _showUnitDialog(context),
                               style: OutlinedButton.styleFrom(
                                 shape: const RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8))),
-                                padding:
-                                    const EdgeInsets.only(right: 5, left: 16),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8),
+                                  ),
+                                ),
+                                padding: const EdgeInsets.only(
+                                  right: 5,
+                                  left: 16,
+                                ),
                               ),
-                              child: Row(children: [
-                                Text(
-                                  context.select<HomeProvider, String>(
-                                      (value) => value.currentUnit),
-                                  style: const TextStyle(fontSize: 18),
-                                ),
-                                const Icon(
-                                  Icons.arrow_drop_down,
-                                ),
-                              ]),
-                            )
+                              child: Row(
+                                children: [
+                                  Text(
+                                    context.select<HomeProvider, String>(
+                                      (value) => value.currentUnit,
+                                    ),
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                  const Icon(Icons.arrow_drop_down),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       Selector<HomeProvider, bool>(
-                        builder: (context, value, child) => SizedBox(
-                          height: 30,
-                          child: ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) {
-                              int amount = value
-                                  ? reverseShortcuts[index]
-                                  : shortcuts[index];
-                              return _ShortcutPrice(
-                                amount: amount,
-                                onTab: () => context
-                                    .read<HomeProvider>()
-                                    .addPrice(amount),
-                              );
-                            },
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 8),
-                            itemCount: value
-                                ? reverseShortcuts.length
-                                : shortcuts.length,
-                          ),
-                        ),
+                        builder:
+                            (context, value, child) => SizedBox(
+                              height: 30,
+                              child: ListView.separated(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  int amount =
+                                      value
+                                          ? reverseShortcuts[index]
+                                          : shortcuts[index];
+                                  return _ShortcutPrice(
+                                    amount: amount,
+                                    onTab:
+                                        () => context
+                                            .read<HomeProvider>()
+                                            .addPrice(amount),
+                                  );
+                                },
+                                separatorBuilder:
+                                    (_, __) => const SizedBox(width: 8),
+                                itemCount:
+                                    value
+                                        ? reverseShortcuts.length
+                                        : shortcuts.length,
+                              ),
+                            ),
                         selector: (p0, p1) => p1.isReverse,
                       ),
                       Padding(
@@ -195,7 +209,8 @@ class MainScreen extends StatelessWidget {
                         child: TextField(
                           controller: context
                               .select<HomeProvider, TextEditingController>(
-                                  (value) => value.textController),
+                                (value) => value.textController,
+                              ),
                           keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
@@ -208,44 +223,59 @@ class MainScreen extends StatelessWidget {
                             hintText: "원하시는 금액을 입력하세요.",
                             suffix: Text(
                               context.select<HomeProvider, bool>(
-                                      (value) => value.isReverse)
+                                    (value) => value.isReverse,
+                                  )
                                   ? 'KRW'
                                   : context.select<HomeProvider, String>(
-                                      (value) => value.currentUnit),
-                            ),
-                            suffixIcon: context.select<HomeProvider, bool>(
-                                    (value) =>
-                                        value.textController.text.isEmpty)
-                                ? null
-                                : IconButton(
-                                    onPressed: () => context
-                                        .read<HomeProvider>()
-                                        .clearInput(),
-                                    icon: const Icon(
-                                      Icons.cancel,
-                                    ),
+                                    (value) => value.currentUnit,
                                   ),
+                            ),
+                            suffixIcon:
+                                context.select<HomeProvider, bool>(
+                                      (value) =>
+                                          value.textController.text.isEmpty,
+                                    )
+                                    ? null
+                                    : IconButton(
+                                      onPressed:
+                                          () =>
+                                              context
+                                                  .read<HomeProvider>()
+                                                  .clearInput(),
+                                      icon: const Icon(Icons.cancel),
+                                    ),
                           ),
                           textInputAction: TextInputAction.done,
-                          onChanged: context.select<HomeProvider, bool>(
-                                  (value) => value.isLoading)
-                              ? null
-                              : (_) =>
-                                  context.read<HomeProvider>().onInputChanged(),
+                          onChanged:
+                              context.select<HomeProvider, bool>(
+                                    (value) => value.isLoading,
+                                  )
+                                  ? null
+                                  : (_) =>
+                                      context
+                                          .read<HomeProvider>()
+                                          .onInputChanged(),
                         ),
                       ),
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Center(
-                            child: Selector<HomeProvider,
-                                Tuple3<bool, String, int>>(
-                              builder: (context, value, child) => Text(
-                                '${NumberFormat("###,###,###").format(value.item3)} ${value.item1 ? value.item2 : "원"}',
-                                style: const TextStyle(fontSize: 48),
-                              ),
-                              selector: (p0, p1) => Tuple3(
-                                  p1.isReverse, p1.currentUnit, p1.totalAmount),
+                            child: Selector<
+                              HomeProvider,
+                              Tuple3<bool, String, int>
+                            >(
+                              builder:
+                                  (context, value, child) => Text(
+                                    '${NumberFormat("###,###,###").format(value.item3)} ${value.item1 ? value.item2 : "원"}',
+                                    style: const TextStyle(fontSize: 48),
+                                  ),
+                              selector:
+                                  (p0, p1) => Tuple3(
+                                    p1.isReverse,
+                                    p1.currentUnit,
+                                    p1.totalAmount,
+                                  ),
                             ),
                           ),
                         ),
@@ -253,8 +283,9 @@ class MainScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (context
-                    .select<HomeProvider, bool>((value) => value.hasError))
+                if (context.select<HomeProvider, bool>(
+                  (value) => value.hasError,
+                ))
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -267,7 +298,7 @@ class MainScreen extends StatelessWidget {
                         style: TextStyle(color: Colors.white, fontSize: 14),
                       ),
                     ),
-                  )
+                  ),
               ],
             ),
           ),
@@ -278,10 +309,7 @@ class MainScreen extends StatelessWidget {
 }
 
 class _ShortcutPrice extends StatelessWidget {
-  const _ShortcutPrice({
-    required this.amount,
-    required this.onTab,
-  });
+  const _ShortcutPrice({required this.amount, required this.onTab});
 
   final int amount;
   final void Function() onTab;
@@ -291,22 +319,12 @@ class _ShortcutPrice extends StatelessWidget {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         minimumSize: Size.zero,
-        padding: const EdgeInsets.symmetric(
-          vertical: 6,
-          horizontal: 10,
-        ),
-        side: const BorderSide(
-          color: Colors.blueAccent,
-        ),
-        textStyle: const TextStyle(
-          fontSize: 14,
-          color: Colors.blueAccent,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+        side: const BorderSide(color: Colors.blueAccent),
+        textStyle: const TextStyle(fontSize: 14, color: Colors.blueAccent),
       ),
       onPressed: onTab,
-      child: Text(
-        "+ ${NumberFormat("###,###,###").format(amount)}",
-      ),
+      child: Text("+ ${NumberFormat("###,###,###").format(amount)}"),
     );
   }
 }
@@ -320,24 +338,15 @@ class _UnitItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(24.0),
-        width: double.infinity,
-        child: Row(
-          children: [
-            Text(
-              unit,
-              style: const TextStyle(fontSize: 20),
-            ),
-            if (selected) ...[
-              const SizedBox(
-                width: 20,
-              ),
-              const Icon(
-                Icons.done,
-              ),
-            ]
-          ],
-        ));
+      padding: const EdgeInsets.all(24.0),
+      width: double.infinity,
+      child: Row(
+        children: [
+          Text(unit, style: const TextStyle(fontSize: 20)),
+          if (selected) ...[const SizedBox(width: 20), const Icon(Icons.done)],
+        ],
+      ),
+    );
   }
 }
 
@@ -346,7 +355,9 @@ class CommaSeparatorInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: "");
     }

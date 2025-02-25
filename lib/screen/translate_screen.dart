@@ -8,10 +8,7 @@ import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/widgets/debouncer.dart';
 import 'package:translator/translator.dart';
 
-enum _TTSState {
-  playing,
-  stopped,
-}
+enum _TTSState { playing, stopped }
 
 class TranslateScreen extends StatefulWidget {
   const TranslateScreen({super.key});
@@ -34,9 +31,10 @@ class _TranslateScreenState extends State<TranslateScreen> {
   // bool _isThaiInstalled = true;
 
   String _source = availableLanguage[0];
-  List<String> _target = availableLanguage
-      .where((element) => element != availableLanguage[0])
-      .toList();
+  List<String> _target =
+      availableLanguage
+          .where((element) => element != availableLanguage[0])
+          .toList();
 
   String _translated1 = "";
   String _translated2 = "";
@@ -67,22 +65,20 @@ class _TranslateScreenState extends State<TranslateScreen> {
     _tts = FlutterTts();
     _setAwaitOptions();
     if (Platform.isAndroid) {
-      _tts.setEngine('com.google.android.tts').then(
-        (engine) {
-          // Future.wait([
-          //   _tts.isLanguageInstalled('ko-KR'),
-          //   _tts.isLanguageInstalled('en-US'),
-          //   _tts.isLanguageInstalled('th-TH')
-          // ]).then(
-          //   (value) => setState(() {
-          //     _isKoreanInstalled = value[0];
-          //     _isEnglishInstalled = value[1];
-          //     _isThaiInstalled = value[2];
-          //   }),
-          // );
-          // _tts.getVoices.then((value) => print(value));
-        },
-      );
+      _tts.setEngine('com.google.android.tts').then((engine) {
+        // Future.wait([
+        //   _tts.isLanguageInstalled('ko-KR'),
+        //   _tts.isLanguageInstalled('en-US'),
+        //   _tts.isLanguageInstalled('th-TH')
+        // ]).then(
+        //   (value) => setState(() {
+        //     _isKoreanInstalled = value[0];
+        //     _isEnglishInstalled = value[1];
+        //     _isThaiInstalled = value[2];
+        //   }),
+        // );
+        // _tts.getVoices.then((value) => print(value));
+      });
 
       // _getDefaultEngine();
       // _getDefaultVoice();
@@ -187,10 +183,16 @@ class _TranslateScreenState extends State<TranslateScreen> {
 
     log("[검색] 검색어: $value");
     Future.wait([
-      _translator.translate(value,
-          from: _source.toLowerCase(), to: _target[0].toLowerCase()),
-      _translator.translate(value,
-          from: _source.toLowerCase(), to: _target[1].toLowerCase()),
+      _translator.translate(
+        value,
+        from: _source.toLowerCase(),
+        to: _target[0].toLowerCase(),
+      ),
+      _translator.translate(
+        value,
+        from: _source.toLowerCase(),
+        to: _target[1].toLowerCase(),
+      ),
     ]).then((result) {
       setState(() {
         _translated1 = result[0].text;
@@ -204,30 +206,29 @@ class _TranslateScreenState extends State<TranslateScreen> {
     showModalBottomSheet(
       context: originContext,
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var lang in availableLanguage)
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () => _changeSource(lang),
-                    child: Text(
-                      lang,
-                    ),
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var lang in availableLanguage)
+                TextButton(
+                  style: TextButton.styleFrom(
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
-                  if (lang == _source) ...[
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    const Icon(
-                      Icons.done,
-                    ),
-                  ],
-                ],
-              ),
-          ],
+                  onPressed: () => _changeSource(lang),
+                  child: Row(
+                    children: [
+                      Text(lang),
+                      if (lang == _source) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.done),
+                      ],
+                    ],
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -249,10 +250,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
       appBar: AppBar(
         actions: [
           if (_isSearch)
-            IconButton(
-              onPressed: _handleClear,
-              icon: const Icon(Icons.clear),
-            ),
+            IconButton(onPressed: _handleClear, icon: const Icon(Icons.clear)),
         ],
       ),
       body: SafeArea(
@@ -261,6 +259,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
+                clipBehavior: Clip.none,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -273,9 +272,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                       textInputAction: TextInputAction.search,
                       minLines: 1,
                       maxLines: 5,
-                      style: const TextStyle(
-                        fontSize: 24,
-                      ),
+                      style: const TextStyle(fontSize: 24),
                       autofocus: true,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
@@ -306,9 +303,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                               Expanded(
                                 child: Text(
                                   _translated1,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                  ),
+                                  style: const TextStyle(fontSize: 24),
                                 ),
                               ),
                               _TTSButton(
@@ -327,9 +322,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                         ],
                       ),
                     if (_translated2.isNotEmpty) ...[
-                      const SizedBox(
-                        height: 24,
-                      ),
+                      const SizedBox(height: 24),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -339,9 +332,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                               Expanded(
                                 child: Text(
                                   _translated2,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                  ),
+                                  style: const TextStyle(fontSize: 24),
                                 ),
                               ),
                               _TTSButton(
@@ -359,7 +350,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                           ),
                         ],
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -377,10 +368,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                       ),
                     ),
                   ),
-                  const Icon(
-                    Icons.arrow_forward,
-                    color: Colors.grey,
-                  ),
+                  const Icon(Icons.arrow_forward, color: Colors.grey),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -392,7 +380,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -401,11 +389,12 @@ class _TranslateScreenState extends State<TranslateScreen> {
 }
 
 class _TTSButton extends StatelessWidget {
-  const _TTSButton(
-      {required this.language,
-      required this.isInstalled,
-      required this.state,
-      required this.onPlay});
+  const _TTSButton({
+    required this.language,
+    required this.isInstalled,
+    required this.state,
+    required this.onPlay,
+  });
 
   final String language;
   final bool isInstalled;

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/screen/home_page.dart';
 import 'package:my_exchange/theme.dart';
 
 Future<void> main() async {
   initializeGetIt();
-  // WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   // final data = await PlatformAssetBundle().load('certs/lets-encrypt-r3.pem');
   // SecurityContext.defaultContext
   //     .setTrustedCertificatesBytes(data.buffer.asUint8List());
@@ -24,12 +27,13 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          textScaler: TextScaler.noScaling,
-        ),
-        child: child!,
-      ),
+      builder:
+          (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.noScaling),
+            child: child!,
+          ),
       home: const MainScreen(),
     );
   }

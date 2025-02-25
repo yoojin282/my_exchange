@@ -21,30 +21,28 @@ class _ChartScreenState extends State<ChartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("환율변동 그래프"),
-      ),
+      appBar: AppBar(title: const Text("환율변동 그래프")),
       body: SafeArea(
         child: ListView.separated(
-            padding: const EdgeInsets.all(20),
-            itemBuilder: (context, index) {
-              return FutureBuilder(
-                future: _service.getCurrenciesByUnit(availableUnits[index]),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  return _ChartItem(
-                    unit: availableUnits[index],
-                    data: snapshot.requireData,
-                  );
-                },
-              );
-            },
-            separatorBuilder: (context, index) => const SizedBox(height: 20),
-            itemCount: availableUnits.length),
+          padding: const EdgeInsets.all(20),
+          clipBehavior: Clip.none,
+          itemBuilder: (context, index) {
+            return FutureBuilder(
+              future: _service.getCurrenciesByUnit(availableUnits[index]),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return _ChartItem(
+                  unit: availableUnits[index],
+                  data: snapshot.requireData,
+                );
+              },
+            );
+          },
+          separatorBuilder: (context, index) => const SizedBox(height: 20),
+          itemCount: availableUnits.length,
+        ),
       ),
     );
   }
@@ -85,9 +83,7 @@ class _ChartItem extends StatelessWidget {
       isStrokeCapRound: true,
       dotData: const FlDotData(show: true),
       belowBarData: BarAreaData(show: true),
-      gradient: LinearGradient(
-        colors: _gradientColors,
-      ),
+      gradient: LinearGradient(colors: _gradientColors),
       spots: spots,
     );
     return LineChartData(
@@ -106,14 +102,13 @@ class _ChartItem extends StatelessWidget {
         drawVerticalLine: false,
       ),
       titlesData: FlTitlesData(
-          show: true,
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          leftTitles: AxisTitles(
-              sideTitles: SideTitles(
+        show: true,
+        rightTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 48,
             getTitlesWidget: (value, meta) {
@@ -127,9 +122,10 @@ class _ChartItem extends StatelessWidget {
                 ),
               );
             },
-          )),
-          bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
+          ),
+        ),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
             showTitles: true,
             getTitlesWidget: (value, meta) {
               if (value % 2 != 0) return const SizedBox();
@@ -142,7 +138,9 @@ class _ChartItem extends StatelessWidget {
                 ),
               );
             },
-          ))),
+          ),
+        ),
+      ),
     );
   }
 
@@ -160,10 +158,7 @@ class _ChartItem extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(
-              unit,
-              style: const TextStyle(color: Colors.white70),
-            ),
+            Text(unit, style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 16),
             AspectRatio(aspectRatio: 1.5, child: LineChart(_createChartData())),
           ],
