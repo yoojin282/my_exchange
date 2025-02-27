@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_exchange/get_it.dart';
-import 'package:my_exchange/screen/home_page.dart';
+import 'package:my_exchange/screen/home_screen.dart';
 import 'package:my_exchange/theme.dart';
 
 Future<void> main() async {

@@ -32,31 +32,39 @@ class HomeProvider with ChangeNotifier {
   bool get hasError => _error;
 
   void _load() {
-    _loading = false;
-    notifyListeners();
-    setCurrentUnit(_currentUnit);
+    _loading = true;
+    setCurrentUnit(_currentUnit).then((_) {
+      _loading = false;
+    });
+  }
+
+  void reload() {
+    _load();
   }
 
   void onInputChanged() {
     final inputText = _textController.text.replaceAll(",", "");
     if (inputText.isNotEmpty) {
-      _textController.text =
-          NumberFormat("###,###,###").format(int.parse(inputText));
+      _textController.text = NumberFormat(
+        "###,###,###",
+      ).format(int.parse(inputText));
     }
     _calculate();
   }
 
-  void setCurrentUnit(String unit) {
-    _service.getCurrency(unit).then((value) {
+  Future<void> setCurrentUnit(String unit) async {
+    return _service.getCurrency(unit).then((value) {
       _loading = false;
-      if (value == null) {
+      if (value == null || value.currency == null || value.hasApiError) {
         _error = true;
         notifyListeners();
         return;
       }
-      _date = value.date;
-      _currentUnit = value.unit;
-      _rate = value.rate;
+
+      final currency = value.currency!;
+      _date = currency.date;
+      _currentUnit = currency.unit;
+      _rate = currency.rate;
       _textController.text = "0";
       _calculate();
     });
@@ -76,8 +84,9 @@ class HomeProvider with ChangeNotifier {
 
   void addPrice(int amount) {
     Decimal sum = _getInputPrice() + Decimal.fromInt(amount);
-    _textController.text =
-        DecimalFormatter(NumberFormat("###,###,###")).format(sum);
+    _textController.text = DecimalFormatter(
+      NumberFormat("###,###,###"),
+    ).format(sum);
     _calculate();
   }
 
@@ -86,9 +95,10 @@ class HomeProvider with ChangeNotifier {
         _rate * Decimal.parse(_currentUnit.endsWith("(100)") ? "0.01" : "1");
     Decimal input = _getInputPrice();
 
-    Decimal result = _reverse
-        ? (input / realRate).toDecimal(scaleOnInfinitePrecision: 0)
-        : input * realRate;
+    Decimal result =
+        _reverse
+            ? (input / realRate).toDecimal(scaleOnInfinitePrecision: 0)
+            : input * realRate;
     _totalAmount = result.toBigInt().toInt();
     notifyListeners();
   }

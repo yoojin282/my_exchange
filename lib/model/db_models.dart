@@ -6,11 +6,7 @@ class ExchangeDB {
   final DateTime createdAt;
   List<CurrencyDB>? currencies;
 
-  ExchangeDB({
-    required this.date,
-    required this.createdAt,
-    this.currencies,
-  });
+  ExchangeDB({required this.date, required this.createdAt, this.currencies});
 
   Map<String, dynamic> toJson() {
     return {
@@ -69,4 +65,11 @@ class CurrencyDB {
     );
     CREATE UNIQUE INDEX idx_date_unit ON $tableName(date, unit);
   ''';
+}
+
+class CurrentWrapper {
+  final CurrencyDB? currency;
+  final bool hasApiError;
+
+  CurrentWrapper({this.currency, this.hasApiError = false});
 }

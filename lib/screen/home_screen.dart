@@ -293,9 +293,26 @@ class MainScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       color: Colors.red,
-                      child: const Text(
-                        "환율정보 불러오기에 실패했습니다. 잠시후 다시 시도해 주세요.",
-                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: const Text(
+                              "환율정보 불러오기에 실패했습니다.",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed:
+                                () => context.read<HomeProvider>().reload(),
+                            icon: const Icon(
+                              Icons.refresh,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
