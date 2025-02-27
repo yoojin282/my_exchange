@@ -80,6 +80,7 @@ class ExchangeRepository {
       queryParams,
     );
 
+    // TODO 이상한 값 들고오는듯
     try {
       final res = await http.get(uri, headers: {'apikey': Constants.apiKey});
       result = convert.jsonDecode(convert.utf8.decode(res.bodyBytes));
