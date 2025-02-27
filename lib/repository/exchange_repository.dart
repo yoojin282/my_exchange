@@ -88,7 +88,7 @@ class ExchangeRepository {
       return null;
     }
 
-    if (!result['success']) return null;
+    if (result['success'] ?? false) return null;
 
     List<CurrencyDB> currencies = [];
     for (var item in (result['rates'] as Map<String, dynamic>).entries) {
