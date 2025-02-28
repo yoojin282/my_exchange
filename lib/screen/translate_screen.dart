@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -96,7 +95,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
     });
     _tts.setErrorHandler((msg) {
       setState(() {
-        log("[TTS] error: $msg");
+        logger.e("[TTS] error: $msg");
         _ttsState = _TTSState.stopped;
       });
     });
@@ -181,7 +180,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
   void _translate(String value) {
     if (_searchedText == value) return;
 
-    log("[검색] 검색어: $value");
+    logger.d("[검색] 검색어: $value");
     Future.wait([
       _translator.translate(
         value,

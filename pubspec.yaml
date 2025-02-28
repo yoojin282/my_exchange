@@ -32,6 +32,7 @@ dependencies:
   decimal: ^3.2.1
   translator: ^1.0.3+1
   flutter_tts: ^4.2.2
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:

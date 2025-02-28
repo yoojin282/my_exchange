@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/model/db_models.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -17,7 +16,7 @@ class DatabaseService {
   }
 
   Future<void> reset() async {
-    log('[DB] 로컬 DB 삭제');
+    logger.d('[DB] 로컬 DB 삭제');
     await deleteDatabaseFile();
   }
 
@@ -39,7 +38,7 @@ class DatabaseService {
   }
 
   void _onCreate(Database database, int version) async {
-    log("[DB] Scheme 생성");
+    logger.d("[DB] Scheme 생성");
     await database.execute(ExchangeDB.sqlCreate);
     await database.execute(CurrencyDB.sqlCreate);
   }
@@ -47,7 +46,7 @@ class DatabaseService {
   void _onUpgrade(Database database, int oldVersion, int newVersion) {
     if (newVersion > oldVersion) {
       if (newVersion == 2) {
-        log("[DB] JPY 데이터 제거");
+        logger.d("[DB] JPY 데이터 제거");
         database.delete(
           CurrencyDB.tableName,
           where: "unit = ?",

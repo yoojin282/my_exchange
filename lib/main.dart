@@ -1,10 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/screen/home_screen.dart';
 import 'package:my_exchange/theme.dart';
 
 Future<void> main() async {
   initializeGetIt();
+  if (kDebugMode) {
+    Logger.level = Level.debug;
+  } else {
+    Logger.level = Level.warning;
+  }
   // WidgetsFlutterBinding.ensureInitialized();
   // final data = await PlatformAssetBundle().load('certs/lets-encrypt-r3.pem');
   // SecurityContext.defaultContext

@@ -1,7 +1,4 @@
-import 'dart:developer';
-
 import 'package:decimal/decimal.dart';
-import 'package:intl/intl.dart';
 import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/model/db_models.dart';
 import 'package:my_exchange/service/database_service.dart';
@@ -20,7 +17,7 @@ class ExchangeRepository {
       exchangeTableName,
       columns: ['count(*)'],
       where: "date = ?",
-      whereArgs: [DateFormat("yyyy-MM-dd").format(date)],
+      whereArgs: [dateFormat.format(date)],
     );
     int count = Sqflite.firstIntValue(result) ?? 0;
     return count > 0;
@@ -32,7 +29,7 @@ class ExchangeRepository {
       currencyTableName,
       columns: ["date", "unit", "rate"],
       where: "date = ? and unit = ?",
-      whereArgs: [DateFormat("yyyy-MM-dd").format(date), unit],
+      whereArgs: [dateFormat.format(date), unit],
     );
     return CurrencyDB.fromJson(result[0]);
   }
@@ -40,10 +37,10 @@ class ExchangeRepository {
   Future<void> save(ExchangeDB exchange) async {
     final db = await dbProvider.database;
     return db.transaction((txn) async {
-      log("[DB] 베이스 데이터 저장");
+      logger.d("[DB] 베이스 데이터 저장");
       await txn.insert(exchangeTableName, exchange.toJson());
       if (exchange.currencies?.isNotEmpty ?? false) {
-        log('[DB] 나라별 환율정보 저장');
+        logger.d('[DB] 나라별 환율정보 저장');
         for (final currency in exchange.currencies!) {
           await txn.insert(currencyTableName, currency.toJson());
         }
@@ -72,7 +69,7 @@ class ExchangeRepository {
 
   Future<ExchangeDB?> getExchangeRateByDateFromApi(DateTime date) async {
     late final Map<String, dynamic> result;
-    final paramDate = DateFormat('yyyy-MM-dd').format(date);
+    final paramDate = dateFormat.format(date);
     final queryParams = {'symbols': availableUnits.join(','), 'base': baseUnit};
     final uri = Uri.https(
       apiHost,
@@ -80,16 +77,21 @@ class ExchangeRepository {
       queryParams,
     );
 
-    // TODO 이상한 값 들고오는듯
+    logger.d("[API] 요청: $uri");
     try {
       final res = await http.get(uri, headers: {'apikey': Constants.apiKey});
+      if (res.statusCode != 200) {
+        logger.e("[API] 에러: $uri ${res.statusCode}\n${res.body}");
+        return null;
+      }
       result = convert.jsonDecode(convert.utf8.decode(res.bodyBytes));
+      logger.d("[API] 응답: $result");
     } catch (e) {
-      log("[에러] ${e.toString()}");
+      logger.e("[API] 에러: ${e.toString()}");
       return null;
     }
 
-    if (result['success'] ?? false) return null;
+    if (!result['success']) return null;
 
     List<CurrencyDB> currencies = [];
     for (var item in (result['rates'] as Map<String, dynamic>).entries) {
