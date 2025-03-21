@@ -54,12 +54,21 @@ class MainScreen extends StatelessWidget {
         // final theme = Theme.of(context);
         return Scaffold(
           appBar: AppBar(
-            title: const Text("환율여행"),
+            title: Row(
+              children: [
+                const Text('환율 계산기'),
+                const SizedBox(width: 8),
+                if (context.select<HomeProvider, bool>(
+                  (value) => value.isLoading,
+                ))
+                  const _RefreshIcon(),
+              ],
+            ),
             centerTitle: false,
-            leading:
-                context.select<HomeProvider, bool>((value) => value.isLoading)
-                    ? const _RefreshIcon()
-                    : null,
+            // leading:
+            //     context.select<HomeProvider, bool>((value) => value.isLoading)
+            //         ? const _RefreshIcon()
+            //         : null,
             actions: [
               IconButton(
                 onPressed:
