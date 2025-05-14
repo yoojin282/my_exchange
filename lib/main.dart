@@ -1,6 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:my_exchange/firebase_options.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/screen/home_screen.dart';
 import 'package:my_exchange/theme.dart';
@@ -12,7 +15,16 @@ Future<void> main() async {
   } else {
     Logger.level = Level.warning;
   }
-  // WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   // final data = await PlatformAssetBundle().load('certs/lets-encrypt-r3.pem');
   // SecurityContext.defaultContext
   //     .setTrustedCertificatesBytes(data.buffer.asUint8List());
@@ -52,20 +64,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// class NoCheckCerfiticationHttpOverrides extends HttpOverrides {
-//   @override
-//   HttpClient createHttpClient(SecurityContext? context) {
-//     return super.createHttpClient(context)
-//       ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-//         // Allowing only our Base API URL.
-//         List<String> validHosts = ["api.apilayer.com"];
-
-//         final isValidHost = validHosts.contains(host);
-//         return isValidHost;
-
-//         // return true if you want to allow all host. (This isn't recommended.)
-//         // return true;
-//       };
-//   }
-// }

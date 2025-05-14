@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "484979999544",
+    "project_id": "my-exchange-40bb7",
+    "storage_bucket": "my-exchange-40bb7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484979999544:android:83896682fdb22b5bffb7cd",
+        "android_client_info": {
+          "package_name": "com.yoojin282.my_exchange"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2lHcEzd0vI4vMeXNlwNXJ7Dr1kxkA5Bg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

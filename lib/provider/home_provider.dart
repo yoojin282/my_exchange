@@ -39,6 +39,7 @@ class HomeProvider with ChangeNotifier {
   }
 
   void reload() {
+    _error = false;
     _load();
   }
 

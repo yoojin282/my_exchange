@@ -30,7 +30,6 @@ class MainScreen extends StatelessWidget {
                           ? BorderRadius.vertical(bottom: Radius.circular(8))
                           : null,
                   onTap: () {
-                    // _changeUnit(unit);
                     provider.setCurrentUnit(availableUnits[i]);
                     Navigator.pop(context);
                   },
