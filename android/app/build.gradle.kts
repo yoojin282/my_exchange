@@ -24,6 +24,11 @@ android {
     compileSdk = 36
     ndkVersion = "28.0.13004108"
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
