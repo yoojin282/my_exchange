@@ -23,12 +23,11 @@ class MainScreen extends StatelessWidget {
             children: [
               for (var i = 0; i < availableUnits.length; i++)
                 InkWell(
-                  borderRadius:
-                      i == 0
-                          ? BorderRadius.vertical(top: Radius.circular(28))
-                          : i == availableUnits.length - 1
-                          ? BorderRadius.vertical(bottom: Radius.circular(8))
-                          : null,
+                  borderRadius: i == 0
+                      ? BorderRadius.vertical(top: Radius.circular(28))
+                      : i == availableUnits.length - 1
+                      ? BorderRadius.vertical(bottom: Radius.circular(8))
+                      : null,
                   onTap: () {
                     provider.setCurrentUnit(availableUnits[i]);
                     Navigator.pop(context);
@@ -70,23 +69,19 @@ class MainScreen extends StatelessWidget {
             //         : null,
             actions: [
               IconButton(
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const TranslateScreen(),
-                      ),
-                    ),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TranslateScreen(),
+                  ),
+                ),
                 icon: const Icon(Icons.g_translate),
               ),
               IconButton(
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChartScreen(),
-                      ),
-                    ),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ChartScreen()),
+                ),
                 icon: const Icon(Icons.bar_chart),
               ),
             ],
@@ -124,33 +119,29 @@ class MainScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Selector<HomeProvider, Tuple2<String, bool>>(
-                              builder:
-                                  (context, value, child) => Row(
-                                    children: [
-                                      Text(
-                                        value.item2 ? "KRW" : value.item1,
-                                        style: const TextStyle(fontSize: 18),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.swap_horizontal_circle,
-                                        ),
-                                        onPressed:
-                                            () =>
-                                                context
-                                                    .read<HomeProvider>()
-                                                    .toggleReverse(),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        value.item2 ? value.item1 : "KRW",
-                                        style: const TextStyle(fontSize: 18),
-                                      ),
-                                    ],
+                              builder: (context, value, child) => Row(
+                                children: [
+                                  Text(
+                                    value.item2 ? "KRW" : value.item1,
+                                    style: const TextStyle(fontSize: 18),
                                   ),
-                              selector:
-                                  (p0, p1) =>
-                                      Tuple2(p1.currentUnit, p1.isReverse),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.swap_horizontal_circle,
+                                    ),
+                                    onPressed: () => context
+                                        .read<HomeProvider>()
+                                        .toggleReverse(),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    value.item2 ? value.item1 : "KRW",
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                              selector: (p0, p1) =>
+                                  Tuple2(p1.currentUnit, p1.isReverse),
                             ),
                             OutlinedButton(
                               onPressed: () => _showUnitDialog(context),
@@ -181,35 +172,29 @@ class MainScreen extends StatelessWidget {
                         ),
                       ),
                       Selector<HomeProvider, bool>(
-                        builder:
-                            (context, value, child) => SizedBox(
-                              height: 30,
-                              child: ListView.separated(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) {
-                                  int amount =
-                                      value
-                                          ? reverseShortcuts[index]
-                                          : shortcuts[index];
-                                  return _ShortcutPrice(
-                                    amount: amount,
-                                    onTab:
-                                        () => context
-                                            .read<HomeProvider>()
-                                            .addPrice(amount),
-                                  );
-                                },
-                                separatorBuilder:
-                                    (_, __) => const SizedBox(width: 8),
-                                itemCount:
-                                    value
-                                        ? reverseShortcuts.length
-                                        : shortcuts.length,
-                              ),
-                            ),
+                        builder: (context, value, child) => SizedBox(
+                          height: 30,
+                          child: ListView.separated(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              int amount = value
+                                  ? reverseShortcuts[index]
+                                  : shortcuts[index];
+                              return _ShortcutPrice(
+                                amount: amount,
+                                onTab: () => context
+                                    .read<HomeProvider>()
+                                    .addPrice(amount),
+                              );
+                            },
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(width: 8),
+                            itemCount: value
+                                ? reverseShortcuts.length
+                                : shortcuts.length,
+                          ),
+                        ),
                         selector: (p0, p1) => p1.isReverse,
                       ),
                       Padding(
@@ -235,56 +220,51 @@ class MainScreen extends StatelessWidget {
                                   )
                                   ? 'KRW'
                                   : context.select<HomeProvider, String>(
-                                    (value) => value.currentUnit,
-                                  ),
+                                      (value) => value.currentUnit,
+                                    ),
                             ),
                             suffixIcon:
                                 context.select<HomeProvider, bool>(
-                                      (value) =>
-                                          value.textController.text.isEmpty,
-                                    )
-                                    ? null
-                                    : IconButton(
-                                      onPressed:
-                                          () =>
-                                              context
-                                                  .read<HomeProvider>()
-                                                  .clearInput(),
-                                      icon: const Icon(Icons.cancel),
-                                    ),
+                                  (value) => value.textController.text.isEmpty,
+                                )
+                                ? null
+                                : IconButton(
+                                    onPressed: () => context
+                                        .read<HomeProvider>()
+                                        .clearInput(),
+                                    icon: const Icon(Icons.cancel),
+                                  ),
                           ),
                           textInputAction: TextInputAction.done,
                           onChanged:
                               context.select<HomeProvider, bool>(
-                                    (value) => value.isLoading,
-                                  )
-                                  ? null
-                                  : (_) =>
-                                      context
-                                          .read<HomeProvider>()
-                                          .onInputChanged(),
+                                (value) => value.isLoading,
+                              )
+                              ? null
+                              : (_) => context
+                                    .read<HomeProvider>()
+                                    .onInputChanged(),
                         ),
                       ),
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Center(
-                            child: Selector<
-                              HomeProvider,
-                              Tuple3<bool, String, int>
-                            >(
-                              builder:
-                                  (context, value, child) => Text(
+                            child:
+                                Selector<
+                                  HomeProvider,
+                                  Tuple3<bool, String, int>
+                                >(
+                                  builder: (context, value, child) => Text(
                                     '${NumberFormat("###,###,###").format(value.item3)} ${value.item1 ? value.item2 : "원"}',
                                     style: const TextStyle(fontSize: 48),
                                   ),
-                              selector:
-                                  (p0, p1) => Tuple3(
+                                  selector: (p0, p1) => Tuple3(
                                     p1.isReverse,
                                     p1.currentUnit,
                                     p1.totalAmount,
                                   ),
-                            ),
+                                ),
                           ),
                         ),
                       ),
@@ -313,8 +293,8 @@ class MainScreen extends StatelessWidget {
                             ),
                           ),
                           IconButton(
-                            onPressed:
-                                () => context.read<HomeProvider>().reload(),
+                            onPressed: () =>
+                                context.read<HomeProvider>().reload(),
                             icon: const Icon(
                               Icons.refresh,
                               color: Colors.white,
