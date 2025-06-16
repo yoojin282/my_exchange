@@ -88,10 +88,10 @@ class ExchangeRepository {
       logger.d("[API] 응답: $result");
     } catch (e) {
       logger.e("[API] 에러: ${e.toString()}");
-      return null;
+      rethrow;
     }
 
-    if (!result['success']) return null;
+    if (!(result['success'] ?? false)) return null;
 
     List<CurrencyDB> currencies = [];
     for (var item in (result['rates'] as Map<String, dynamic>).entries) {
