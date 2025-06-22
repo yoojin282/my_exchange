@@ -53,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: decimal
-      sha256: "28239b8b929c1bd8618702e6dbc96e2618cf99770bbe9cb040d6cf56a11e4ec3"
+      sha256: "5a6577b30ec74f5e3f482f31c238de26bd1983594419d2799fcb3e76a4a85252"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.3"
   equatable:
     dependency: transitive
     description:

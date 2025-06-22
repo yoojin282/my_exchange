@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:decimal/decimal.dart';
 import 'package:my_exchange/constants.dart';
 import 'package:my_exchange/model/db_models.dart';
@@ -79,7 +81,9 @@ class ExchangeRepository {
 
     logger.d("[API] 요청: $uri");
     try {
-      final res = await http.get(uri, headers: {'apikey': Constants.apiKey});
+      final res = await http
+          .get(uri, headers: {'apikey': Constants.apiKey})
+          .timeout(Duration(seconds: 5));
       if (res.statusCode != 200) {
         logger.e("[API] 에러: $uri ${res.statusCode}\n${res.body}");
         return null;
