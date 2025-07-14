@@ -29,15 +29,15 @@ dependencies:
   provider: ^6.1.5
   tuple: ^2.0.2
   fl_chart: ^1.0.0
-  decimal: ^3.2.3
+  decimal: ^3.2.4
   translator: ^1.0.3+1
   flutter_tts: ^4.2.3
-  logger: ^2.5.0
-  firebase_core: ^3.14.0
-  firebase_crashlytics: ^4.3.7
+  logger: ^2.6.0
+  firebase_core: ^3.15.1
+  firebase_crashlytics: ^4.3.9
 
 
-dev_dependencies:
+dev_dependencies: 
   flutter_test:
     sdk: flutter
 
