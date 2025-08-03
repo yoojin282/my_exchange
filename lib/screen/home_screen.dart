@@ -279,7 +279,7 @@ class MainScreen extends StatelessWidget {
                     left: 0,
                     right: 0,
                     child: Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(10),
                       color: Colors.red,
                       child: Row(
                         children: [

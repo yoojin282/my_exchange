@@ -33,6 +33,7 @@ class HomeProvider with ChangeNotifier {
 
   void _load() {
     _loading = true;
+    notifyListeners();
     setCurrentUnit(_currentUnit).then((_) {
       _loading = false;
     });
@@ -40,6 +41,7 @@ class HomeProvider with ChangeNotifier {
 
   void reload() {
     _error = false;
+    notifyListeners();
     _load();
   }
 
@@ -96,10 +98,9 @@ class HomeProvider with ChangeNotifier {
         _rate * Decimal.parse(_currentUnit.endsWith("(100)") ? "0.01" : "1");
     Decimal input = _getInputPrice();
 
-    Decimal result =
-        _reverse
-            ? (input / realRate).toDecimal(scaleOnInfinitePrecision: 0)
-            : input * realRate;
+    Decimal result = _reverse
+        ? (input / realRate).toDecimal(scaleOnInfinitePrecision: 0)
+        : input * realRate;
     _totalAmount = result.toBigInt().toInt();
     notifyListeners();
   }

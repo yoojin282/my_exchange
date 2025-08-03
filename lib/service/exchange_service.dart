@@ -3,7 +3,7 @@ import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/model/db_models.dart';
 import 'package:my_exchange/repository/exchange_repository.dart';
 
-const maxRetryCount = 5;
+const maxRetryCount = 2;
 
 class ExchangeService {
   final _repository = getIt<ExchangeRepository>();
@@ -29,19 +29,26 @@ class ExchangeService {
           .then((value) => CurrentWrapper(currency: value));
     }
     logger.d('[API] API 환율정보 불러오기');
-    final result = await _repository.getExchangeRateByDateFromApi(date);
-    if (result != null) {
-      logger.d("[DB] 불러온 API 환율 저장");
-      await _repository.save(result);
-      return _repository
-          .selectByDateAndUnit(date, unit)
-          .then((value) => CurrentWrapper(currency: value));
-    } else {
-      // DB 에서 마지막 날짜 환율 가져오기
-      logger.d("[DB] DB 에서 마지막 날짜 환율 가져오기. unit: $unit");
-      return _repository
-          .selectLastByUnit(unit)
-          .then((value) => CurrentWrapper(currency: value, hasApiError: true));
+    try {
+      final result = await _repository.getExchangeRateByDateFromApi(date);
+      if (result != null) {
+        logger.d("[DB] 불러온 API 환율 저장");
+        await _repository.save(result);
+        return _repository
+            .selectByDateAndUnit(date, unit)
+            .then((value) => CurrentWrapper(currency: value));
+      } else {
+        // DB 에서 마지막 날짜 환율 가져오기
+        logger.d("[DB] DB 에서 마지막 날짜 환율 가져오기. unit: $unit");
+        return _repository
+            .selectLastByUnit(unit)
+            .then(
+              (value) => CurrentWrapper(currency: value, hasApiError: true),
+            );
+      }
+    } catch (e) {
+      logger.e("[API] 환율정보 불러오기 실패: $e");
+      return CurrentWrapper(hasApiError: true);
     }
   }
 
