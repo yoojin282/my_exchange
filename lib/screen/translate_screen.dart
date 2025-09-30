@@ -30,10 +30,9 @@ class _TranslateScreenState extends State<TranslateScreen> {
   // bool _isThaiInstalled = true;
 
   String _source = availableLanguage[0];
-  List<String> _target =
-      availableLanguage
-          .where((element) => element != availableLanguage[0])
-          .toList();
+  List<String> _target = availableLanguage
+      .where((element) => element != availableLanguage[0])
+      .toList();
 
   String _translated1 = "";
   String _translated2 = "";
