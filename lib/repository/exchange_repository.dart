@@ -104,7 +104,11 @@ class ExchangeRepository {
         CurrencyDB(
           date: date,
           rate: Decimal.parse(
-            rate > 99 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(2),
+            rate > 99
+                ? rate.toStringAsFixed(0)
+                : rate > 1
+                ? rate.toStringAsFixed(2)
+                : rate.toStringAsFixed(3),
           ),
           unit: item.key,
         ),

@@ -12,7 +12,7 @@ class ExchangeService {
     DateTime date = DateTime.now().add(Duration(hours: -9));
     for (int i = 0; i < maxRetryCount; i++) {
       final currentDate = date.add(Duration(days: -i));
-      logger.d("[환율] 로딩.. (${i + 1}차: ${dateFormat.format(currentDate)})");
+      logger.d("[환율] 로딩 (${i + 1}차: ${dateFormat.format(currentDate)})");
       final result = await _getCurrency(currentDate, unit);
       if (result.currency != null) return result;
     }

@@ -23,7 +23,8 @@ class ExchangeDB {
   }
 
   static const tableName = "exchange";
-  static const sqlCreate = '''
+  static const sqlCreate =
+      '''
     CREATE TABLE $tableName (
       date DATE PRIMARY KEY,
       created_at DATETIME NOT NULL
@@ -50,12 +51,13 @@ class CurrencyDB {
     return {
       "date": DateFormat("yyyy-MM-dd").format(date),
       "unit": unit,
-      "rate": rate.toStringAsFixed(2),
+      "rate": rate.toStringAsFixed(3),
     };
   }
 
   static const tableName = "currency";
-  static const sqlCreate = '''
+  static const sqlCreate =
+      '''
     CREATE TABLE $tableName (
       date DATE NOT NULL,
       unit VARCHAR(10) NOT NULL,

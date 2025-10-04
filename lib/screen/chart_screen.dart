@@ -74,8 +74,13 @@ class _ChartItem extends StatelessWidget {
       minY = min(minY, rate);
     }
 
-    maxY = (maxY * 1.05).toInt().toDouble();
-    minY = (minY * 0.95).toInt().toDouble();
+    if (maxY < 1) {
+      maxY = (maxY * 1.02 * 100) / 100;
+      minY = (minY * 0.98 * 100) / 100;
+    } else {
+      maxY = (maxY * 1.05).toInt().toDouble();
+      minY = (minY * 0.95).toInt().toDouble();
+    }
 
     final barData = LineChartBarData(
       isCurved: true,
@@ -86,6 +91,7 @@ class _ChartItem extends StatelessWidget {
       gradient: LinearGradient(colors: _gradientColors),
       spots: spots,
     );
+
     return LineChartData(
       lineBarsData: [barData],
       minY: minY,
@@ -114,7 +120,9 @@ class _ChartItem extends StatelessWidget {
             getTitlesWidget: (value, meta) {
               if (value == minY || value == maxY) return const SizedBox();
               return Text(
-                value.toInt().toString(),
+                value < 1
+                    ? value.toStringAsFixed(3).replaceFirst("0.", ".")
+                    : value.toInt().toString(),
                 style: const TextStyle(
                   color: Color(0xff67727d),
                   fontWeight: FontWeight.bold,
@@ -146,6 +154,9 @@ class _ChartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (data.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Card(
       elevation: 1,
       color: const Color(0xff222e38),
