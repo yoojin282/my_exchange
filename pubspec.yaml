@@ -32,9 +32,9 @@ dependencies:
   decimal: ^3.2.4
   translator: ^1.0.4+1
   flutter_tts: ^4.2.3
-  logger: ^2.6.0
-  firebase_core: ^4.1.1
-  firebase_crashlytics: ^5.0.2
+  logger: ^2.6.2
+  firebase_core: ^4.2.0
+  firebase_crashlytics: ^5.0.3
 
 
 dev_dependencies: 
