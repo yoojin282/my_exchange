@@ -34,13 +34,13 @@ class ExchangeService {
       if (result != null) {
         logger.d("[DB] 불러온 API 환율 저장");
         await _repository.save(result);
-        return _repository
+        return await _repository
             .selectByDateAndUnit(date, unit)
             .then((value) => CurrentWrapper(currency: value));
       } else {
         // DB 에서 마지막 날짜 환율 가져오기
         logger.d("[DB] DB 에서 마지막 날짜 환율 가져오기. unit: $unit");
-        return _repository
+        return await _repository
             .selectLastByUnit(unit)
             .then(
               (value) => CurrentWrapper(currency: value, hasApiError: true),
