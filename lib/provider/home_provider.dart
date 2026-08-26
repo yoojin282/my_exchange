@@ -1,6 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:decimal/intl.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:my_exchange/get_it.dart';
 import 'package:my_exchange/service/exchange_service.dart';
